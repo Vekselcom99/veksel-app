@@ -1,34 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VEKSEL APP</title>
+    <title>VEKSEL OFFICIAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .logo { font-size: 32px; font-weight: bold; color: #0088cc; margin-bottom: 10px; text-shadow: 0 0 15px #0088cc; }
-        .table-box { background: #111; border: 1px solid #333; border-radius: 20px; padding: 20px; margin: 20px 0; }
-        .slots { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-        .slot { width: 45px; height: 45px; background: #222; border-radius: 12px; line-height: 45px; border: 1px solid #444; }
-        .active { background: #0088cc; border-color: #5ac8fa; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        .wallet { font-size: 11px; color: #666; background: #0a0a0a; padding: 10px; border-radius: 10px; margin-top: 30px; word-break: break-all; }
-        .play-btn { background: linear-gradient(180deg, #0088cc, #005588); color: white; border: none; padding: 20px; width: 100%; border-radius: 15px; font-size: 20px; font-weight: bold; margin-top: 40px; box-shadow: 0 5px 15px rgba(0,136,204,0.3); }
-        .insurance { color: #4cd964; margin-top: 15px; font-size: 14px; }
+        :root { --blue: #0088cc; --dark: #000; --green: #4cd964; --gold: #ffd700; }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        #loader { position: fixed; inset: 0; background: radial-gradient(circle, #001a2b 0%, #000 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
+        .globe { width: 130px; height: 130px; background: url('https://www.transparentpng.com/download/globe/world-globe-png-images-9.png'); background-size: cover; border-radius: 50%; box-shadow: 0 0 50px var(--blue); animation: rotate 12s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #onboarding { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; padding: 40px 20px; text-align: center; }
+        .slide { display: none; animation: fadeIn 0.5s; }
+        .active-slide { display: block; }
+        .btn-next { background: var(--blue); color: white; border: none; padding: 20px; width: 100%; border-radius: 20px; font-size: 18px; font-weight: bold; margin-top: 40px; }
+        #main-content { display: none; padding-bottom: 90px; height: 100vh; overflow-y: auto; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .active-page { display: block; }
+        .card { background: #111; border-radius: 25px; padding: 20px; border: 1px solid #222; margin-bottom: 15px; }
+        .grid-11 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+        .slot { background: #1a1a1a; height: 50px; border-radius: 12px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .slot.occupied { border-color: var(--blue); color: var(--blue); background: rgba(0,136,204,0.1); }
+        .slot.special { border: 2px dashed var(--green); color: var(--green); }
+        .nav { position: fixed; bottom: 0; width: 100%; background: rgba(10,10,10,0.9); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #222; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
-    <div class="logo">VEKSEL</div>
-    <div class="table-box">
-        <div>ОЧЕРЕДЬ (СМЕЩЕНИЕ ВЛЕВО)</div>
-        <div class="slots">
-            <div class="slot">№5</div><div class="slot">№4</div><div class="slot">№3</div><div class="slot">№2</div><div class="slot active">№1</div>
+    <div id="loader"><div class="globe"></div><h1 style="color:var(--blue); margin-top:25px;">VEKSEL</h1></div>
+    <div id="onboarding">
+        <div id="slide1" class="slide active-slide"><h2>ДОВЕРИЕ</h2><p>Система, где каждый участник доверяет другому.</p></div>
+        <div id="slide2" class="slide"><h2>ЦЕПОЧКА</h2><p>Распределение средств поровну между всеми.</p></div>
+        <div id="slide3" class="slide"><h2>ЗАЩИТА</h2><p>Резерв в 10 Векселей всегда в банке.</p></div>
+        <button class="btn-next" onclick="nextSlide()">ДАЛЕЕ</button>
+    </div>
+    <div id="main-content">
+        <div id="p-home" class="page active-page">
+            <div class="card"><div style="color:#666">ОБЩИЙ ЗАПАС</div><div style="font-size: 38px; font-weight: bold; color: var(--gold);">800,000,000</div></div>
+            <button class="btn-next" onclick="show('p-rooms')">НАЧАТЬ</button>
+        </div>
+        <div id="p-rooms" class="page">
+            <h2>СТОЛЫ</h2>
+            <div class="card" onclick="show('p-table')"><span>СТОЛ №1</span> <b style="color:var(--green)">1 VEK</b></div>
+        </div>
+        <div id="p-table" class="page">
+            <h2>ОЧЕРЕДЬ</h2>
+            <div class="grid-11">
+                <div class="slot occupied">1</div><div class="slot occupied">2</div><div class="slot occupied">3</div><div class="slot occupied">4</div>
+                <div class="slot occupied">5</div><div class="slot occupied">6</div><div class="slot occupied">7</div><div class="slot occupied">8</div>
+                <div class="slot occupied">9</div><div class="slot occupied">10</div><div class="slot special">11</div>
+            </div>
         </div>
     </div>
-    <div class="wallet">TON: UQAg_G-0S0H9XJ_p_R-y9L0W-H-6zG3-Y-0-E-R-O-L-L</div>
-    <button class="play-btn" onclick="Telegram.WebApp.showAlert('Вексель активирован! Ожидайте подтверждения в сети TON.')">PLAY (ИГРАТЬ)</button>
-    <div class="insurance">🛡 Страховой фонд: 10 Векселей АКТИВНО</div>
-    <script>let tg = window.Telegram.WebApp; tg.expand();</script>
+    <nav class="nav" id="main-nav" style="display:none;"><div onclick="show('p-home')">🏠</div><div onclick="show('p-rooms')">📊</div></nav>
+    <script>
+        let currentS = 1;
+        setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('onboarding').style.display = 'block'; }, 2000);
+        function nextSlide() {
+            if (currentS < 3) {
+                document.getElementById('slide' + currentS).classList.remove('active-slide');
+                currentS++;
+                document.getElementById('slide' + currentS).classList.add('active-slide');
+            } else {
+                document.getElementById('onboarding').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('main-nav').style.display = 'flex';
+            }
+        }
+        function show(pId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(pId).classList.add('active-page');
+        }
+    </script>
 </body>
 </html>
