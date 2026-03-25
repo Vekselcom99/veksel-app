@@ -3,115 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VEKSEL</title>
+    <title>VEKSEL ONLINE</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Courier New', Courier, monospace; margin: 0; padding: 0; overflow: hidden; }
-        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
+        :root { --main-blue: #0088cc; --dark-bg: #0a0a0a; }
+        body { background-color: var(--dark-bg); color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; overflow: hidden; }
+        
+        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; }
         .active { display: flex; }
 
-        /* ЭКРАН 1: ЗАГРУЗКА */
-        .loader-bar { width: 85%; height: 30px; border: 2px solid #fff; margin: 20px 0; position: relative; }
-        .loader-fill { width: 0%; height: 100%; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #333 10px, #333 20px); transition: 2s linear; }
+        /* ЛОГОТИП (Синий рисунок) */
+        .logo-container { margin: 20px auto; text-align: center; }
+        .blue-logo { 
+            width: 80px; height: 80px; border: 3px solid var(--main-blue); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px var(--main-blue); font-size: 40px; color: var(--main-blue);
+        }
 
-        /* ЭКРАН 6: ГЛАВНОЕ МЕНЮ (Глобус слева, кнопки справа) */
-        .menu-layout { display: flex; width: 100%; height: 80%; align-items: flex-start; justify-content: space-around; }
-        .globe-section { flex: 1; display: flex; flex-direction: column; align-items: center; }
-        .globe { width: 150px; height: 150px; border: 1px solid #fff; border-radius: 50%; background: radial-gradient(circle, #333, #000); display: flex; align-items: center; justify-content: center; font-size: 50px; }
-        .buttons-section { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-        .menu-btn { background: #1a1a1a; border: 1px solid #555; padding: 12px; color: #fff; font-size: 14px; text-align: left; cursor: pointer; }
+        /* ИГРОВОЙ СТОЛ (Стиль онлайн-игры) */
+        .game-area { position: relative; width: 300px; height: 300px; margin: 20px auto; background: radial-gradient(circle, #1a1a1a 0%, #000 70%); border-radius: 50%; border: 2px solid #333; }
+        .slot { 
+            position: absolute; width: 40px; height: 40px; border: 1px solid var(--main-blue); 
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px;
+            background: rgba(0, 136, 204, 0.1); transition: 0.3s;
+        }
+        .slot.occupied { background: var(--main-blue); box-shadow: 0 0 10px var(--main-blue); }
+        .queue-11 { 
+            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
+            border: 2px dashed #555; padding: 5px 15px; border-radius: 5px; color: #555;
+        }
+        .queue-active { border-color: #00ff00; color: #00ff00; animation: pulse 1.5s infinite; }
 
-        /* ЭКРАН 4: ОБМЕН */
-        .exchange-box { border: 2px solid #555; padding: 30px; width: 80%; position: relative; }
-        .exchange-line { border-bottom: 1px solid #555; margin: 15px 0; }
+        /* МЕНЮ И КНОПКИ */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
+        .btn { 
+            background: #1c1c1c; border: 1px solid #333; padding: 15px; color: #fff; 
+            border-radius: 8px; font-weight: bold; text-align: center; cursor: pointer;
+        }
+        .btn-blue { background: var(--main-blue); border: none; }
+        .stats { background: #111; padding: 15px; border-radius: 10px; margin: 10px 20px; border-left: 4px solid var(--main-blue); }
 
-        /* ЭКРАН 2 & 5: СТОЛЫ */
-        .table-circle { width: 180px; height: 180px; border: 1px solid #444; border-radius: 50%; position: relative; margin: 20px 0; display: flex; align-items: center; justify-content: center; }
-        .player-icon { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; }
-
-        .next-btn { background: #0088cc; color: #fff; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin-top: 20px; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
-<body onload="startApp()">
+<body>
 
-    <div id="screen1" class="screen active">
-        <h1 style="font-size: 40px;">VEKSEL</h1>
-        <p>ЗАГРУЗКА</p>
-        <div class="loader-bar"><div id="bar" class="loader-fill"></div></div>
-        <p style="margin-top: 50px;">VEKSEL GRUP</p>
-    </div>
+    <div id="main" class="screen active">
+        <div class="logo-container">
+            <div class="blue-logo">🌐</div>
+            <h2 style="color:var(--main-blue)">VEKSEL</h2>
+        </div>
+        
+        <div class="stats">
+            <div>БАЛАНС: <span id="bal">0</span> VEK</div>
+            <div style="font-size: 12px; color: #aaa;">В БАНКЕ СТОЛА: 110 TON</div>
+        </div>
 
-    <div id="screen6" class="screen">
-        <div style="width: 100%; text-align: left; padding-left: 20px;">ПРОФИЛЬ (👤)</div>
-        <div class="menu-layout">
-            <div class="globe-section">
-                <div class="globe">🌐</div>
-                <h2 style="font-size: 30px;">VEKSEL</h2>
-            </div>
-            <div class="buttons-section">
-                <div class="menu-btn" onclick="showScreen('screen2')">ГЛАВНАЯ</div>
-                <div class="menu-btn">БАЛАНС</div>
-                <div class="menu-btn" onclick="showScreen('screen4')">ОБМЕН</div>
-                <div class="menu-btn">ВЫВОД</div>
-                <div class="menu-btn">ПОПОЛНЕНИЯ</div>
-                <div class="menu-btn">ПРАВИЛА</div>
-            </div>
+        <div class="game-area" id="table">
+            <div class="queue-11" id="q11">ЖДЕМ 11-ГО...</div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="btn btn-blue" onclick="deposit()">ПОПОЛНИТЬ</div>
+            <div class="btn" onclick="withdraw()">ВЫВОД</div>
+            <div class="btn" style="grid-column: span 2;" onclick="showExchange()">ОБМЕН (TON/VEKSEL)</div>
         </div>
     </div>
 
-    <div id="screen2" class="screen">
-        <div class="table-circle" id="table2"></div>
-        <p>ВСЕГО В БАНКЕ 110 ТОИСОIИ</p>
-        <p style="font-size: 12px;">КАЖДЫЙ ПОЛЬЗОВАТЕЛЬ ВНОСИТ ПО 10 TON. ВСЕГО УЧАСТНИКОВ 10.</p>
-        <button class="next-btn" onclick="showScreen('screen3')">ДАЛЕЕ</button>
-    </div>
-
-    <div id="screen3" class="screen">
-        <h3>ЦЕПОЧКА</h3>
-        <p style="font-size: 12px; padding: 0 10px;">ЕСЛИ ТУР НАЧАЛСЯ И 11-Й НЕ ПОЛУЧИЛ ДЕНЬГИ, ЕГО ДОЛЯ КОМПЕНСИРУЕТСЯ ИЗ СРЕДСТВ VEKSEL (КОМИССИИ).</p>
-        <div class="table-circle" id="table3"></div>
-        <p>ЧИСТАЯ КОНЦЕПЦИЯ</p>
-        <button class="next-btn" onclick="showScreen('screen6')">В МЕНЮ</button>
-    </div>
-
-    <div id="screen4" class="screen">
-        <div class="globe" style="width: 60px; height: 60px; font-size: 25px; margin-bottom: 20px;">🌐</div>
-        <div class="exchange-box">
-            <div style="display: flex; justify-content: space-between;"><span>TON</span><span>= 10</span></div>
-            <div class="exchange-line"></div>
-            <div style="display: flex; justify-content: space-between;"><span>VEKSEL</span><span>= 10</span></div>
-            <button class="next-btn" style="width: 100%; margin-top: 20px;">ОБМЕНЯТЬ</button>
+    <div id="exchange" class="screen">
+        <h2 style="text-align:center; margin-top:50px;">ОБМЕН ВАЛЮТЫ</h2>
+        <div class="stats" style="margin-top:20px; text-align:center;">
+            <p>10 TON = 10 VEKSEL</p>
+            <button class="btn btn-blue" style="width:100%" onclick="doExchange()">ОБМЕНЯТЬ</button>
         </div>
-        <p>balans: 10 VEK</p>
-        <button onclick="showScreen('screen6')" style="background:none; color:#777; border:none; margin-top:15px;">НАЗАД</button>
+        <div class="btn" style="margin: 20px;" onclick="showMain()">НАЗАД В МЕНЮ</div>
     </div>
 
     <script>
-        function startApp() {
-            setTimeout(() => {
-                document.getElementById('bar').style.width = '100%';
-                setTimeout(() => showScreen('screen6'), 2100);
-            }, 500);
+        let balance = 0;
+        
+        // Рисуем стол как в онлайн игре
+        const table = document.getElementById('table');
+        for (let i = 0; i < 10; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'slot occupied'; // По умолчанию заняты
+            const angle = (i / 10) * 2 * Math.PI - Math.PI/2;
+            slot.style.left = (130 + 110 * Math.cos(angle)) + 'px';
+            slot.style.top = (130 + 110 * Math.sin(angle)) + 'px';
+            slot.innerText = i + 1;
+            table.appendChild(slot);
         }
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if (id === 'screen2') drawPlayers('table2', 10);
-            if (id === 'screen3') drawPlayers('table3', 10);
+        function deposit() {
+            balance += 10;
+            document.getElementById('bal').innerText = balance;
+            alert("Счет пополнен на 10 TON");
         }
 
-        function drawPlayers(elementId, count) {
-            const table = document.getElementById(elementId);
-            table.innerHTML = '';
-            for (let i = 0; i < count; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'player-icon';
-                const angle = (i / count) * 2 * Math.PI;
-                dot.style.left = (85 + 75 * Math.cos(angle)) + 'px';
-                dot.style.top = (85 + 75 * Math.sin(angle)) + 'px';
-                table.appendChild(dot);
+        function withdraw() {
+            if(balance <= 0) {
+                alert("Недостаточно средств для вывода");
+            } else {
+                alert("Запрос на вывод " + balance + " VEK отправлен");
+                balance = 0;
+                document.getElementById('bal').innerText = balance;
             }
         }
+
+        function showExchange() {
+            document.getElementById('main').classList.remove('active');
+            document.getElementById('exchange').classList.add('active');
+        }
+
+        function showMain() {
+            document.getElementById('exchange').classList.remove('active');
+            document.getElementById('main').classList.add('active');
+        }
+
+        function doExchange() {
+            alert("Обмен успешно выполнен!");
+            showMain();
+        }
+
+        // Эмуляция ожидания 11-го игрока
+        setInterval(() => {
+            const q = document.getElementById('q11');
+            q.classList.toggle('queue-active');
+            q.innerText = q.classList.contains('queue-active') ? "11-Й В ОЧЕРЕДИ!" : "ЖДЕМ 11-ГО...";
+        }, 2000);
     </script>
 </body>
 </html>
