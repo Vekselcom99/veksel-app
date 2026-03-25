@@ -4,153 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>VEKSEL APP</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        .screen { display: none; width: 100vw; min-height: 100vh; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
+        .active { display: flex; }
+        
+        /* ЭКРАН 1: ЗАГРУЗКА */
+        .loader-bar { width: 80%; height: 25px; border: 1px solid #fff; margin: 20px 0; position: relative; }
+        .loader-fill { width: 0%; height: 100%; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #333 10px, #333 20px); transition: 2s linear; }
 
-        /* Глобус из твоего эскиза №6 */
-        .globe-container {
-            margin: 20px 0;
-            position: relative;
-        }
+        /* ЭКРАН 2 & 5: СТОЛЫ И ОЧЕРЕДЬ */
+        .table-wrap { position: relative; width: 220px; height: 220px; border-radius: 50%; border: 1px solid #444; margin: 20px 0; display: flex; align-items: center; justify-content: center; }
+        .player-dot { position: absolute; width: 15px; height: 15px; background: #fff; border-radius: 50%; }
+        .queue-row { display: flex; gap: 5px; margin-top: 10px; }
+        .queue-item { width: 25px; height: 25px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; font-size: 10px; }
 
-        .globe {
-            width: 150px;
-            height: 150px;
-            border: 2px solid #333;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #1a1a1a, #000);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            animation: rotate 10s linear infinite;
-        }
+        /* ЭКРАН 6: МЕНЮ */
+        .globe-big { width: 180px; height: 180px; border: 1px solid #333; border-radius: 50%; background: radial-gradient(circle, #222, #000); margin: 20px 0; }
+        .menu-right { width: 100%; display: flex; flex-direction: column; gap: 5px; }
+        .menu-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px; text-transform: uppercase; font-weight: bold; font-size: 14px; }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Меню справа как на листе №6 */
-        .main-layout {
-            display: flex;
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .menu-list {
-            list-style: none;
-            padding: 0;
-            width: 45%;
-        }
-
-        .menu-item {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            padding: 10px;
-            margin-bottom: 5px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-
-        /* Окно обмена из эскиза №4 */
-        .exchange-card {
-            background: #111;
-            border: 1px solid #0088cc;
-            border-radius: 15px;
-            padding: 15px;
-            width: 100%;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .currency-row {
-            display: flex;
-            justify-content: space-around;
-            margin: 10px 0;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        /* Кнопка подключения TON */
-        .btn-ton {
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            width: 100%;
-            font-weight: bold;
-            font-size: 16px;
-            margin-top: 15px;
-            cursor: pointer;
-        }
-
-        .veksel-logo {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 5px;
-            color: #fff;
-            margin-bottom: 10px;
-        }
+        /* КНОПКИ */
+        .btn-next { background: #0088cc; color: #fff; border: none; padding: 15px 40px; border-radius: 15px; font-weight: bold; width: 80%; margin-top: 20px; cursor: pointer; }
+        .bank-info { color: #00ff00; font-weight: bold; }
     </style>
 </head>
-<body>
+<body onload="runLoader()">
 
-    <div class="veksel-logo">VEKSEL</div>
-
-    <div class="main-layout">
-        <div style="width: 50%;">
-            <div class="globe">🌐</div>
-            <div style="text-align: center; margin-top: 10px;">ПРОФИЛЬ</div>
-        </div>
-
-        <ul class="menu-list">
-            <li class="menu-item">Главная</li>
-            <li class="menu-item">Баланс</li>
-            <li class="menu-item">Обмен</li>
-            <li class="menu-item">Вывод</li>
-            <li class="menu-item">Правила</li>
-        </ul>
+    <div id="sc1" class="screen active">
+        <h1 style="letter-spacing: 5px;">VEKSEL</h1>
+        <p>ЗАГРУЗКА</p>
+        <div class="loader-bar"><div id="bar" class="loader-fill"></div></div>
+        <p style="position: absolute; bottom: 30px;">VEKSEL GRUP</p>
     </div>
 
-    <div class="exchange-card">
-        <div style="color: #888; font-size: 12px;">ОБМЕН ВАЛЮТЫ</div>
-        <div class="currency-row">
-            <span>TON</span>
-            <span>=</span>
-            <span style="color: #0088cc;">10</span>
+    <div id="sc2" class="screen">
+        <div class="table-wrap">
+            <div id="players2"></div>
+            <div style="text-align: center; font-size: 12px;">ВСЕГО В БАНКЕ<br>110 ТОИСОIИ</div>
         </div>
-        <div style="border-bottom: 1px solid #333; margin: 10px 0;"></div>
-        <div class="currency-row">
-            <span>VEKSEL</span>
-            <span>=</span>
-            <span style="color: #00ff00;">10</span>
+        <p style="font-size: 14px; padding: 0 10px;">КАЖДЫЙ ПОЛЬЗОВАТЕЛЬ ВНОСИТ ПО 10 TON. ВСЕГО УЧАСТНИКОВ ЗА СТОЛОМ 10.</p>
+        <div class="queue-row" id="queue2"></div>
+        <button class="btn-next" onclick="show(3)">ДАЛЕЕ</button>
+    </div>
+
+    <div id="sc3" class="screen">
+        <h3>ЦЕПОЧКА</h3>
+        <p style="font-size: 13px;">ЕСЛИ ТУР НАЧАЛСЯ И 11-Й НЕ ПОЛУЧИЛ СВОИ ДЕНЬГИ, ЕГО ДОЛЯ БУДЕТ КОМПЕНСИРОВАНА ИЗ СРЕДСТВ VEKSEL.</p>
+        <div class="table-wrap" style="height: 150px; width: 150px;">
+            <div id="players3"></div>
         </div>
-        
-        <button class="btn-ton" onclick="connectWallet()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
-        <div style="margin-top: 10px; font-size: 14px;">balans: 0 VEK</div>
+        <p style="font-size: 12px; color: #888;">НЕКАКОГО ОБМАНА ЧИСТАЯ КОНЦЕПЦИЯ</p>
+        <button class="btn-next" onclick="show(6)">ДАЛЕЕ</button>
+    </div>
+
+    <div id="sc6" class="screen">
+        <p style="align-self: flex-start;">ПРОФИЛЬ</p>
+        <div class="globe-big"></div>
+        <h1 style="margin: 0;">VEKSEL</h1>
+        <div class="menu-right">
+            <div class="menu-btn" onclick="show(2)">ГЛАВНАЯ</div>
+            <div class="menu-btn" onclick="show(4)">ОБМЕН</div>
+            <div class="menu-btn">БАЛАНС</div>
+            <div class="menu-btn">ВЫВОД</div>
+            <div class="menu-btn">ПОПОЛНЕНИЯ</div>
+            <div class="menu-btn">ПРАВИЛА</div>
+        </div>
+    </div>
+
+    <div id="sc4" class="screen">
+        <div style="border: 1px solid #444; padding: 20px; width: 90%; margin-top: 40px;">
+            <div style="display: flex; justify-content: space-between; font-size: 20px;">
+                <span>TON</span><span>=</span><span>10</span>
+            </div>
+            <hr style="border: 0.5px solid #333; margin: 15px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 20px;">
+                <span>VEKSEL</span><span>=</span><span>10</span>
+            </div>
+            <button class="btn-next" style="width: 100%;">ОБМЕНЯТЬ</button>
+        </div>
+        <p style="margin-top: 20px;">balans: 10 VEK</p>
+        <button onclick="show(6)" style="background: none; color: #555; border: none; margin-top: 10px;">НАЗАД</button>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-
-        function connectWallet() {
-            tg.showConfirm("Подключить кошелек TON для участия в туре?");
+        function show(num) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('sc' + num).classList.add('active');
+            if(num === 2) createPlayers('players2', 10);
+            if(num === 3) createPlayers('players3', 8);
         }
+
+        function runLoader() {
+            setTimeout(() => {
+                document.getElementById('bar').style.width = '100%';
+                setTimeout(() => show(6), 2100);
+            }, 100);
+        }
+
+        function createPlayers(containerId, count) {
+            const cont = document.getElementById(containerId);
+            cont.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'player-dot';
+                const angle = (i / count) * 2 * Math.PI;
+                dot.style.left = (90 + 80 * Math.cos(angle)) + 'px';
+                dot.style.top = (90 + 80 * Math.sin(angle)) + 'px';
+                cont.appendChild(dot);
+            }
+        }
+
+        // Очередь для эскиза 2
+        const q = document.getElementById('queue2');
+        for(let i=0; i<8; i++) q.innerHTML += '<div class="queue-item">👤</div>';
     </script>
 </body>
 </html>
