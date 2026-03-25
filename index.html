@@ -3,121 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VEKSEL APP</title>
+    <title>VEKSEL</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        .screen { display: none; width: 100vw; min-height: 100vh; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
+        body { background-color: #000; color: #fff; font-family: 'Courier New', Courier, monospace; margin: 0; padding: 0; overflow: hidden; }
+        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
         .active { display: flex; }
-        
+
         /* ЭКРАН 1: ЗАГРУЗКА */
-        .loader-bar { width: 80%; height: 25px; border: 1px solid #fff; margin: 20px 0; position: relative; }
+        .loader-bar { width: 85%; height: 30px; border: 2px solid #fff; margin: 20px 0; position: relative; }
         .loader-fill { width: 0%; height: 100%; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #333 10px, #333 20px); transition: 2s linear; }
 
-        /* ЭКРАН 2 & 5: СТОЛЫ И ОЧЕРЕДЬ */
-        .table-wrap { position: relative; width: 220px; height: 220px; border-radius: 50%; border: 1px solid #444; margin: 20px 0; display: flex; align-items: center; justify-content: center; }
-        .player-dot { position: absolute; width: 15px; height: 15px; background: #fff; border-radius: 50%; }
-        .queue-row { display: flex; gap: 5px; margin-top: 10px; }
-        .queue-item { width: 25px; height: 25px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+        /* ЭКРАН 6: ГЛАВНОЕ МЕНЮ (Глобус слева, кнопки справа) */
+        .menu-layout { display: flex; width: 100%; height: 80%; align-items: flex-start; justify-content: space-around; }
+        .globe-section { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .globe { width: 150px; height: 150px; border: 1px solid #fff; border-radius: 50%; background: radial-gradient(circle, #333, #000); display: flex; align-items: center; justify-content: center; font-size: 50px; }
+        .buttons-section { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        .menu-btn { background: #1a1a1a; border: 1px solid #555; padding: 12px; color: #fff; font-size: 14px; text-align: left; cursor: pointer; }
 
-        /* ЭКРАН 6: МЕНЮ */
-        .globe-big { width: 180px; height: 180px; border: 1px solid #333; border-radius: 50%; background: radial-gradient(circle, #222, #000); margin: 20px 0; }
-        .menu-right { width: 100%; display: flex; flex-direction: column; gap: 5px; }
-        .menu-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px; text-transform: uppercase; font-weight: bold; font-size: 14px; }
+        /* ЭКРАН 4: ОБМЕН */
+        .exchange-box { border: 2px solid #555; padding: 30px; width: 80%; position: relative; }
+        .exchange-line { border-bottom: 1px solid #555; margin: 15px 0; }
 
-        /* КНОПКИ */
-        .btn-next { background: #0088cc; color: #fff; border: none; padding: 15px 40px; border-radius: 15px; font-weight: bold; width: 80%; margin-top: 20px; cursor: pointer; }
-        .bank-info { color: #00ff00; font-weight: bold; }
+        /* ЭКРАН 2 & 5: СТОЛЫ */
+        .table-circle { width: 180px; height: 180px; border: 1px solid #444; border-radius: 50%; position: relative; margin: 20px 0; display: flex; align-items: center; justify-content: center; }
+        .player-icon { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; }
+
+        .next-btn { background: #0088cc; color: #fff; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
-<body onload="runLoader()">
+<body onload="startApp()">
 
-    <div id="sc1" class="screen active">
-        <h1 style="letter-spacing: 5px;">VEKSEL</h1>
+    <div id="screen1" class="screen active">
+        <h1 style="font-size: 40px;">VEKSEL</h1>
         <p>ЗАГРУЗКА</p>
         <div class="loader-bar"><div id="bar" class="loader-fill"></div></div>
-        <p style="position: absolute; bottom: 30px;">VEKSEL GRUP</p>
+        <p style="margin-top: 50px;">VEKSEL GRUP</p>
     </div>
 
-    <div id="sc2" class="screen">
-        <div class="table-wrap">
-            <div id="players2"></div>
-            <div style="text-align: center; font-size: 12px;">ВСЕГО В БАНКЕ<br>110 ТОИСОIИ</div>
+    <div id="screen6" class="screen">
+        <div style="width: 100%; text-align: left; padding-left: 20px;">ПРОФИЛЬ (👤)</div>
+        <div class="menu-layout">
+            <div class="globe-section">
+                <div class="globe">🌐</div>
+                <h2 style="font-size: 30px;">VEKSEL</h2>
+            </div>
+            <div class="buttons-section">
+                <div class="menu-btn" onclick="showScreen('screen2')">ГЛАВНАЯ</div>
+                <div class="menu-btn">БАЛАНС</div>
+                <div class="menu-btn" onclick="showScreen('screen4')">ОБМЕН</div>
+                <div class="menu-btn">ВЫВОД</div>
+                <div class="menu-btn">ПОПОЛНЕНИЯ</div>
+                <div class="menu-btn">ПРАВИЛА</div>
+            </div>
         </div>
-        <p style="font-size: 14px; padding: 0 10px;">КАЖДЫЙ ПОЛЬЗОВАТЕЛЬ ВНОСИТ ПО 10 TON. ВСЕГО УЧАСТНИКОВ ЗА СТОЛОМ 10.</p>
-        <div class="queue-row" id="queue2"></div>
-        <button class="btn-next" onclick="show(3)">ДАЛЕЕ</button>
     </div>
 
-    <div id="sc3" class="screen">
+    <div id="screen2" class="screen">
+        <div class="table-circle" id="table2"></div>
+        <p>ВСЕГО В БАНКЕ 110 ТОИСОIИ</p>
+        <p style="font-size: 12px;">КАЖДЫЙ ПОЛЬЗОВАТЕЛЬ ВНОСИТ ПО 10 TON. ВСЕГО УЧАСТНИКОВ 10.</p>
+        <button class="next-btn" onclick="showScreen('screen3')">ДАЛЕЕ</button>
+    </div>
+
+    <div id="screen3" class="screen">
         <h3>ЦЕПОЧКА</h3>
-        <p style="font-size: 13px;">ЕСЛИ ТУР НАЧАЛСЯ И 11-Й НЕ ПОЛУЧИЛ СВОИ ДЕНЬГИ, ЕГО ДОЛЯ БУДЕТ КОМПЕНСИРОВАНА ИЗ СРЕДСТВ VEKSEL.</p>
-        <div class="table-wrap" style="height: 150px; width: 150px;">
-            <div id="players3"></div>
-        </div>
-        <p style="font-size: 12px; color: #888;">НЕКАКОГО ОБМАНА ЧИСТАЯ КОНЦЕПЦИЯ</p>
-        <button class="btn-next" onclick="show(6)">ДАЛЕЕ</button>
+        <p style="font-size: 12px; padding: 0 10px;">ЕСЛИ ТУР НАЧАЛСЯ И 11-Й НЕ ПОЛУЧИЛ ДЕНЬГИ, ЕГО ДОЛЯ КОМПЕНСИРУЕТСЯ ИЗ СРЕДСТВ VEKSEL (КОМИССИИ).</p>
+        <div class="table-circle" id="table3"></div>
+        <p>ЧИСТАЯ КОНЦЕПЦИЯ</p>
+        <button class="next-btn" onclick="showScreen('screen6')">В МЕНЮ</button>
     </div>
 
-    <div id="sc6" class="screen">
-        <p style="align-self: flex-start;">ПРОФИЛЬ</p>
-        <div class="globe-big"></div>
-        <h1 style="margin: 0;">VEKSEL</h1>
-        <div class="menu-right">
-            <div class="menu-btn" onclick="show(2)">ГЛАВНАЯ</div>
-            <div class="menu-btn" onclick="show(4)">ОБМЕН</div>
-            <div class="menu-btn">БАЛАНС</div>
-            <div class="menu-btn">ВЫВОД</div>
-            <div class="menu-btn">ПОПОЛНЕНИЯ</div>
-            <div class="menu-btn">ПРАВИЛА</div>
+    <div id="screen4" class="screen">
+        <div class="globe" style="width: 60px; height: 60px; font-size: 25px; margin-bottom: 20px;">🌐</div>
+        <div class="exchange-box">
+            <div style="display: flex; justify-content: space-between;"><span>TON</span><span>= 10</span></div>
+            <div class="exchange-line"></div>
+            <div style="display: flex; justify-content: space-between;"><span>VEKSEL</span><span>= 10</span></div>
+            <button class="next-btn" style="width: 100%; margin-top: 20px;">ОБМЕНЯТЬ</button>
         </div>
-    </div>
-
-    <div id="sc4" class="screen">
-        <div style="border: 1px solid #444; padding: 20px; width: 90%; margin-top: 40px;">
-            <div style="display: flex; justify-content: space-between; font-size: 20px;">
-                <span>TON</span><span>=</span><span>10</span>
-            </div>
-            <hr style="border: 0.5px solid #333; margin: 15px 0;">
-            <div style="display: flex; justify-content: space-between; font-size: 20px;">
-                <span>VEKSEL</span><span>=</span><span>10</span>
-            </div>
-            <button class="btn-next" style="width: 100%;">ОБМЕНЯТЬ</button>
-        </div>
-        <p style="margin-top: 20px;">balans: 10 VEK</p>
-        <button onclick="show(6)" style="background: none; color: #555; border: none; margin-top: 10px;">НАЗАД</button>
+        <p>balans: 10 VEK</p>
+        <button onclick="showScreen('screen6')" style="background:none; color:#777; border:none; margin-top:15px;">НАЗАД</button>
     </div>
 
     <script>
-        function show(num) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('sc' + num).classList.add('active');
-            if(num === 2) createPlayers('players2', 10);
-            if(num === 3) createPlayers('players3', 8);
-        }
-
-        function runLoader() {
+        function startApp() {
             setTimeout(() => {
                 document.getElementById('bar').style.width = '100%';
-                setTimeout(() => show(6), 2100);
-            }, 100);
+                setTimeout(() => showScreen('screen6'), 2100);
+            }, 500);
         }
 
-        function createPlayers(containerId, count) {
-            const cont = document.getElementById(containerId);
-            cont.innerHTML = '';
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'screen2') drawPlayers('table2', 10);
+            if (id === 'screen3') drawPlayers('table3', 10);
+        }
+
+        function drawPlayers(elementId, count) {
+            const table = document.getElementById(elementId);
+            table.innerHTML = '';
             for (let i = 0; i < count; i++) {
                 const dot = document.createElement('div');
-                dot.className = 'player-dot';
+                dot.className = 'player-icon';
                 const angle = (i / count) * 2 * Math.PI;
-                dot.style.left = (90 + 80 * Math.cos(angle)) + 'px';
-                dot.style.top = (90 + 80 * Math.sin(angle)) + 'px';
-                cont.appendChild(dot);
+                dot.style.left = (85 + 75 * Math.cos(angle)) + 'px';
+                dot.style.top = (85 + 75 * Math.sin(angle)) + 'px';
+                table.appendChild(dot);
             }
         }
-
-        // Очередь для эскиза 2
-        const q = document.getElementById('queue2');
-        for(let i=0; i<8; i++) q.innerHTML += '<div class="queue-item">👤</div>';
     </script>
 </body>
 </html>
