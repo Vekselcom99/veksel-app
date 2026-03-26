@@ -3,299 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VEKSEL - Эволюция Доверия</title>
+    <title>VEKSEL - NEON EVOLUTION</title>
     <style>
         :root {
-            --neon-blue: #00d2ff;
-            --neon-red: #ff4d4d;
-            --dark-bg: #000814;
-            --glass: rgba(0, 210, 255, 0.05);
-            --glass-border: rgba(0, 210, 255, 0.3);
+            --neon-blue: #00f2ff;
+            --neon-glow: rgba(0, 242, 255, 0.6);
+            --bg-bright: #001a2e;
+            --glass: rgba(0, 242, 255, 0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--dark-bg); color: white; overflow: hidden; height: 100vh; width: 100vw; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; padding: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            font-weight: bold; /* Делаем всё жирным по умолчанию */
+            -webkit-tap-highlight-color: transparent; 
+        }
 
-        /* --- BACKGROUND GLOBE (DOTS) --- */
-        #globe-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        body { 
+            background: var(--bg-bright); 
+            background: radial-gradient(circle at center, #003d5c 0%, #000814 100%);
+            color: white; 
+            overflow: hidden; 
+            height: 100vh; 
+            width: 100vw; 
+        }
 
-        .screen { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; background: radial-gradient(circle at center, rgba(0,29,61,0.4) 0%, transparent 100%); }
+        #main-canvas { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; 
+        }
+
+        /* --- АНИМАЦИЯ ДЫШАЩЕГО НЕОНА --- */
+        @keyframes breathe {
+            0% { box-shadow: 0 0 5px var(--neon-glow); border-color: rgba(0, 242, 255, 0.3); opacity: 0.8; }
+            50% { box-shadow: 0 0 20px var(--neon-blue); border-color: var(--neon-blue); opacity: 1; }
+            100% { box-shadow: 0 0 5px var(--neon-glow); border-color: rgba(0, 242, 255, 0.3); opacity: 0.8; }
+        }
+
+        .screen { 
+            display: none; position: absolute; width: 100%; height: 100%; 
+            flex-direction: column; align-items: center; padding: 20px; 
+            overflow: hidden;
+        }
         .active { display: flex; }
 
-        /* --- SPLASH SCREEN --- */
-        #splash-screen { justify-content: center; }
-        .logo-box { text-align: center; }
-        .logo-title { font-size: 3.5rem; font-weight: 900; letter-spacing: 8px; text-shadow: 0 0 30px var(--neon-blue); margin-bottom: 40px; }
-        .loader-bar { width: 250px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; border: 1px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
-        #progress-fill { width: 0%; height: 100%; background: var(--neon-blue); box-shadow: 0 0 20px white; transition: width 0.1s linear; }
+        /* --- КНОПКИ --- */
+        .neon-btn {
+            width: 100%; max-width: 280px;
+            background: var(--glass);
+            border: 2px solid var(--neon-blue);
+            color: white;
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: breathe 3s infinite ease-in-out;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
 
-        /* --- TRANSPARENT SLIDES --- */
-        #slides-screen { padding: 0; scroll-snap-type: y mandatory; background: transparent; }
-        .slide { min-height: 100vh; width: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .slide-card { background: rgba(0, 8, 20, 0.7); border: 1px solid var(--glass-border); padding: 30px; border-radius: 25px; backdrop-filter: blur(8px); text-align: center; max-width: 340px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
-        .slide-img { font-size: 4rem; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--neon-blue)); }
-        .slide h2 { color: var(--neon-blue); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
-        .slide p { font-size: 0.95rem; line-height: 1.5; opacity: 0.9; }
+        /* --- ПРОФИЛЬ (ПО РИСУНКУ 6) --- */
+        .profile-layout {
+            display: flex; width: 100%; height: 80%; margin-top: 30px;
+        }
+        .profile-left {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .profile-right {
+            flex: 1; display: flex; flex-direction: column; gap: 8px; justify-content: center;
+            opacity: 0; animation: fadeIn 1s forwards 0.5s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- MAIN MENU --- */
-        .menu-btn { width: 100%; max-width: 280px; background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 22px; border-radius: 18px; margin-bottom: 15px; font-size: 1.1rem; letter-spacing: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 15px; transition: 0.2s; position: relative; overflow: hidden; }
-        .menu-btn:active { background: rgba(0, 210, 255, 0.2); transform: scale(0.96); }
-        .icon-box { font-size: 1.4rem; }
+        .prof-btn {
+            padding: 10px; font-size: 0.75rem; margin-bottom: 5px; border-radius: 8px;
+        }
 
-        /* --- 3D TABLE ROOM --- */
-        .room-title { font-size: 1.2rem; letter-spacing: 3px; margin-bottom: 5px; color: var(--neon-blue); }
-        .table-3d-wrap { position: relative; width: 100%; height: 300px; perspective: 1200px; margin-top: 20px; }
-        .table-surface { position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%) rotateX(55deg); width: 280px; height: 160px; background: radial-gradient(ellipse, #003566 0%, #000814 100%); border: 4px solid var(--neon-blue); border-radius: 100px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 30px var(--neon-blue); }
-        .bank-info { position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-        .bank-val { font-size: 1.2rem; font-weight: bold; text-shadow: 0 0 10px var(--neon-blue); }
-        .player-avatar { position: absolute; width: 36px; height: 36px; background: #001d3d; border: 1.5px solid var(--neon-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; z-index: 5; }
-        .player-avatar.me { border-color: gold; box-shadow: 0 0 15px gold; color: gold; font-weight: bold; }
-        .waiter-box { position: absolute; right: 20px; top: 50px; text-align: center; }
-        .waiter-avatar { width: 45px; height: 45px; background: #111; border: 2px dashed var(--neon-blue); border-radius: 10px; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; }
-        .mini-progress { width: 60px; height: 4px; background: #222; border-radius: 2px; margin: 5px auto; overflow: hidden; }
-        .mini-fill { width: 65%; height: 100%; background: var(--neon-blue); }
+        .trust-icons {
+            margin-top: 15px; text-align: center; font-size: 2rem; opacity: 0.8;
+        }
 
-        /* --- PROFILE --- */
-        .profile-container { display: flex; width: 100%; height: 75vh; margin-top: 20px; }
-        .profile-left { flex: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .profile-right { flex: 1; display: flex; flex-direction: column; gap: 8px; padding-right: 10px; }
-        .prof-nav-btn { background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 10px; font-size: 0.75rem; text-align: center; text-transform: uppercase; }
-        .handshake { width: 100px; height: auto; opacity: 0.8; margin-top: 20px; filter: grayscale(1) invert(1); }
-        .warning-box { color: var(--neon-red); font-size: 0.65rem; text-align: center; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px; }
+        /* --- СТОЛ (ПО РИСУНКУ 5) --- */
+        .table-area {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
+        }
+        .poker-table-3d {
+            position: relative; width: 300px; height: 180px;
+            background: radial-gradient(ellipse, #005a8d 0%, #000d1a 100%);
+            border: 5px solid var(--neon-blue);
+            border-radius: 150px;
+            transform: rotateX(50deg);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 40px var(--neon-blue);
+        }
+        .table-content {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; z-index: 10; pointer-events: none;
+        }
+        .bank-title { font-size: 0.7rem; color: var(--neon-blue); letter-spacing: 2px; }
+        .bank-amount { font-size: 1.4rem; text-shadow: 0 0 10px var(--neon-blue); }
 
-        /* --- UI COMPONENTS --- */
-        .back-link { margin-top: auto; padding: 20px; color: var(--neon-blue); font-weight: bold; cursor: pointer; text-decoration: underline; }
-        .action-btn { background: var(--neon-blue); color: black; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin-top: 20px; box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+        .seat {
+            position: absolute; width: 40px; height: 40px; background: #002b4d;
+            border: 2px solid var(--neon-blue); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+        }
+        .seat.me { border-color: gold; box-shadow: 0 0 15px gold; color: gold; }
+
+        /* --- СЛАЙДЫ --- */
+        .slide-overlay {
+            background: rgba(0, 20, 40, 0.8); border: 2px solid var(--neon-blue);
+            padding: 25px; border-radius: 20px; backdrop-filter: blur(10px);
+            max-width: 320px; text-align: center;
+        }
+
+        .back-nav {
+            margin-top: auto; padding: 20px; color: var(--neon-blue); 
+            text-decoration: underline; cursor: pointer; font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
 
-    <canvas id="globe-canvas"></canvas>
+<canvas id="main-canvas"></canvas>
 
-    <section id="splash-screen" class="screen active">
-        <div class="logo-box">
-            <div class="logo-title">VEKSEL</div>
-            <div class="loader-bar"><div id="progress-fill"></div></div>
-            <p style="margin-top: 15px; font-size: 0.7rem; opacity: 0.5; letter-spacing: 3px;">ЗАГРУЗКА ДАННЫХ...</p>
+<section id="screen-splash" class="screen active" style="justify-content: center;">
+    <h1 style="font-size: 3.5rem; letter-spacing: 10px; text-shadow: 0 0 30px var(--neon-blue);">VEKSEL</h1>
+    <div style="width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 20px; overflow: hidden;">
+        <div id="bar" style="width: 0%; height: 100%; background: var(--neon-blue); box-shadow: 0 0 15px white;"></div>
+    </div>
+</section>
+
+<section id="screen-slides" class="screen" style="justify-content: center;">
+    <div id="slide-content" class="slide-overlay">
+        <div id="slide-img" style="font-size: 4rem; margin-bottom: 20px;">👥➔⭕</div>
+        <h2 id="slide-title" style="color: var(--neon-blue); margin-bottom: 10px;">МЕХАНИКА 10+1</h2>
+        <p id="slide-text" style="font-size: 0.9rem;">11-й игрок встает в очередь. Его взнос делится между 10 игроками за столом.</p>
+        <button class="neon-btn" style="margin-top: 20px;" onclick="nextSlide()">ДАЛЕЕ</button>
+    </div>
+</section>
+
+<section id="screen-menu" class="screen">
+    <div style="margin-top: 50px; text-align: center;">
+        <h2 style="letter-spacing: 5px; font-size: 1.8rem; margin-bottom: 40px;">ГЛАВНОЕ МЕНЮ</h2>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; align-items: center;">
+        <button class="neon-btn" onclick="nav('screen-table')">⭕ СТОЛ</button>
+        <button class="neon-btn" onclick="nav('screen-exchange')">🔄 ОБМЕН</button>
+        <button class="neon-btn" onclick="nav('screen-withdraw')">⬆️ ВЫВОД</button>
+        <button class="neon-btn" onclick="nav('screen-profile')">👤 ПРОФИЛЬ</button>
+    </div>
+</section>
+
+<section id="screen-table" class="screen">
+    <div class="table-area">
+        <div style="margin-bottom: 20px; text-align: center;">
+            <p style="letter-spacing: 3px; color: var(--neon-blue);">СТОЛ В ИГРЕ</p>
         </div>
-    </section>
+        <div style="position: relative; width: 340px; height: 250px;">
+            <div class="poker-table-3d" style="left: 20px; top: 35px;"></div>
+            <div class="table-content">
+                <p class="bank-title">БАНК ТУРА</p>
+                <p class="bank-amount">100 VEKSEL</p>
+            </div>
+            <div id="seats"></div>
+        </div>
+        <div style="margin-top: 30px; background: var(--glass); padding: 10px 20px; border-radius: 10px; border: 1px solid var(--neon-blue);">
+            balans: 10 VEK
+        </div>
+    </div>
+    <div class="back-nav" onclick="nav('screen-menu')">НАЗАД</div>
+</section>
 
-    <section id="slides-screen" class="screen">
-        <div class="slide">
-            <div class="slide-card">
-                <div class="slide-img">👥➔⭕</div>
-                <h2>Механика 10+1</h2>
-                <p>За столом сидят 10 участников. Тур запускается, когда 11-й игрок заходит в комнату. Его взнос распределяется между вами.</p>
+<section id="screen-profile" class="screen">
+    <div class="profile-layout">
+        <div class="profile-left">
+            <div id="profile-globe-space" style="width: 150px; height: 150px;"></div>
+            <h2 style="letter-spacing: 5px; margin-top: 15px; font-size: 1.5rem;">VEKSEL</h2>
+        </div>
+        <div class="profile-right">
+            <button class="neon-btn prof-btn" onclick="nav('screen-menu')">ГЛАВНАЯ</button>
+            <button class="neon-btn prof-btn">БАЛАНС</button>
+            <button class="neon-btn prof-btn" onclick="nav('screen-exchange')">ОБМЕН</button>
+            <button class="neon-btn prof-btn" onclick="nav('screen-withdraw')">ВЫВОД</button>
+            <button class="neon-btn prof-btn">ПОПОЛНЕНИЯ</button>
+            <button class="neon-btn prof-btn" onclick="nav('screen-slides')">ПРАВИЛА</button>
+            
+            <div class="trust-icons">🤝 👥</div>
+            <div style="text-align: center; color: #ff4d4d; font-size: 0.6rem; margin-top: 10px;">
+                🛡️ ПРАВА ЗАЩИЩЕНЫ <br> VEKSEL ALGORITHM
             </div>
         </div>
-        <div class="slide">
-            <div class="slide-card">
-                <div class="slide-img">💰➔💎</div>
-                <h2>Чистая Прибыль</h2>
-                <p>Каждый тур приносит доход. Мы берем лишь малую комиссию для поддержания страхового фонда системы.</p>
-            </div>
-        </div>
-        <div class="slide">
-            <div class="slide-card">
-                <div class="slide-img">🛡️</div>
-                <h2>Полная Защита</h2>
-                <p>Цепочка не прерывается. Если очереди нет — тур откатывается. Мы здесь, чтобы помогать друг другу зарабатывать.</p>
-                <button class="action-btn" onclick="nav('menu-screen')">НАЧАТЬ</button>
-            </div>
-        </div>
-    </section>
+    </div>
+    <div class="back-nav" onclick="nav('screen-menu')">НАЗАД</div>
+</section>
 
-    <section id="menu-screen" class="screen">
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-            <div class="menu-btn" style="width: 50px; padding: 10px; margin:0;" onclick="nav('exchange-screen')">👛</div>
-            <h3 class="logo-title" style="font-size: 1.5rem; margin:0;">VEKSEL</h3>
-            <div class="menu-btn" style="width: 50px; padding: 10px; margin:0;" onclick="nav('profile-screen')">👤</div>
-        </div>
-        <button class="menu-btn" onclick="nav('table-screen')"><span class="icon-box">⭕</span> СТОЛ</button>
-        <button class="menu-btn" onclick="nav('exchange-screen')"><span class="icon-box">🔄</span> ОБМЕН</button>
-        <button class="menu-btn" onclick="nav('withdraw-screen')"><span class="icon-box">⬆️</span> ВЫВОД</button>
-        <button class="menu-btn" onclick="nav('exchange-screen')"><span class="icon-box">💵</span> ПОПОЛНИТЬ</button>
-    </section>
+<section id="screen-exchange" class="screen" style="justify-content: center;">
+    <div class="slide-overlay" style="width: 100%;">
+        <h2 style="color: var(--neon-blue); margin-bottom: 20px;">ОБМЕН</h2>
+        <input type="number" value="10" style="width: 100%; background: none; border: none; border-bottom: 2px solid var(--neon-blue); color: white; padding: 10px; margin-bottom: 20px; font-size: 1.2rem; text-align: center;">
+        <button class="neon-btn">ОБМЕНЯТЬ</button>
+    </div>
+    <div class="back-nav" onclick="nav('screen-menu')">НАЗАД</div>
+</section>
 
-    <section id="table-screen" class="screen">
-        <div class="room-title">СТОЛ №1</div>
-        <p style="font-size: 0.7rem; opacity: 0.7;">ЖДЕМ 11-ГО НА ОЧЕРЕДИ</p>
+<section id="screen-withdraw" class="screen" style="justify-content: center;">
+    <div class="slide-overlay" style="width: 100%;">
+        <h2 style="color: var(--neon-blue); margin-bottom: 20px;">ВЫВОД</h2>
+        <input type="text" placeholder="АДРЕС TON" style="width: 100%; background: none; border: none; border-bottom: 2px solid var(--neon-blue); color: white; padding: 10px; margin-bottom: 20px; text-align: center;">
+        <button class="neon-btn">ВЫВЕСТИ</button>
+    </div>
+    <div class="back-nav" onclick="nav('screen-menu')">НАЗАД</div>
+</section>
 
-        <div class="table-3d-wrap">
-            <div class="waiter-box">
-                <div class="waiter-avatar">👤</div>
-                <div style="font-size: 0.6rem;">ЖДЕМ...</div>
-                <div class="mini-progress"><div class="mini-fill"></div></div>
-            </div>
-            <div class="table-surface"></div>
-            <div class="bank-info">
-                <div style="font-size: 0.6rem; opacity: 0.8;">БАНК ТУРА</div>
-                <div class="bank-val">100 VEKSEL</div>
-            </div>
-            <div id="seats-container"></div>
-        </div>
+<script>
+    // --- ЗВУК ---
+    const a = new (window.AudioContext || window.webkitAudioContext)();
+    function clickSound() {
+        const o = a.createOscillator(), g = a.createGain();
+        o.connect(g); g.connect(a.destination);
+        o.frequency.value = 600; g.gain.value = 0.1;
+        g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.1);
+        o.start(); o.stop(a.currentTime + 0.1);
+    }
 
-        <div class="slide-card" style="width: 100%; padding: 15px; margin-top: 20px;">
-            <p style="font-size: 0.8rem;">Очередь: 15 человек | Ваш номер: -</p>
-        </div>
-        <div style="margin-top: 15px;">balans: 10 VEK</div>
-        <div class="back-link" onclick="nav('menu-screen')">НАЗАД</div>
-    </section>
+    // --- НАВИГАЦИЯ ---
+    function nav(id) {
+        clickSound();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 
-    <section id="profile-screen" class="screen">
-        <div class="room-title">ПРОФИЛЬ</div>
-        <div class="profile-container">
-            <div class="profile-left">
-                <div id="prof-globe-placeholder" style="height: 180px;"></div>
-                <h2 style="letter-spacing: 5px; margin-top: 10px;">VEKSEL</h2>
-            </div>
-            <div class="profile-right">
-                <div class="prof-nav-btn" onclick="nav('menu-screen')">ГЛАВНАЯ</div>
-                <div class="prof-nav-btn">БАЛАНС</div>
-                <div class="prof-nav-btn" onclick="nav('exchange-screen')">ОБМЕН</div>
-                <div class="prof-nav-btn" onclick="nav('withdraw-screen')">ВЫВОД</div>
-                <div class="prof-nav-btn">ПОПОЛНЕНИЯ</div>
-                <div class="prof-nav-btn" onclick="nav('slides-screen')">ПРАВИЛА</div>
-                
-                <div style="text-align: center;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/11516/11516644.png" class="handshake" alt="trust">
-                </div>
-            </div>
-        </div>
-        <div class="warning-box">
-            🛡️<br>
-            Мошеннические действия запрещены.<br>
-            Все права пользователей защищены алгоритмами Veksel.
-        </div>
-        <div class="back-link" onclick="nav('menu-screen')">НАЗАД</div>
-    </section>
+    // --- ГЛОБУС CANVAS ---
+    const canvas = document.getElementById('main-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, pts = [];
 
-    <section id="exchange-screen" class="screen">
-        <h2 class="room-title">ОБМЕН</h2>
-        <div class="slide-card" style="margin-top: 20px; width: 100%;">
-            <label style="display:block; text-align:left; font-size: 0.7rem; color: var(--neon-blue);">ОТДАЕТЕ TON</label>
-            <input type="number" value="10" style="width:100%; background:transparent; border:none; border-bottom:1px solid var(--neon-blue); color:white; padding:10px; margin-bottom: 20px;">
-            <label style="display:block; text-align:left; font-size: 0.7rem; color: var(--neon-blue);">ПОЛУЧАЕТЕ VEKSEL</label>
-            <input type="number" value="10" readonly style="width:100%; background:transparent; border:none; color:var(--neon-blue); padding:10px;">
-            <button class="action-btn">ОБМЕНЯТЬ</button>
-        </div>
-        <div class="back-link" onclick="nav('menu-screen')">НАЗАД</div>
-    </section>
-
-    <section id="withdraw-screen" class="screen">
-        <h2 class="room-title">ВЫВОД</h2>
-        <div class="slide-card" style="margin-top: 20px; width: 100%;">
-            <input type="text" placeholder="АДРЕС КОШЕЛЬКА СЕТЬ TON" style="width:100%; background:transparent; border:none; border-bottom:1px solid var(--neon-blue); color:white; padding:10px; margin-bottom: 20px;">
-            <input type="number" placeholder="СУММА ВЫВОДА" style="width:100%; background:transparent; border:none; border-bottom:1px solid var(--neon-blue); color:white; padding:10px;">
-            <button class="action-btn">ВЫВЕСТИ</button>
-        </div>
-        <div class="back-link" onclick="nav('menu-screen')">НАЗАД</div>
-    </section>
-
-    <script>
-        // --- AUDIO ENGINE ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playClick() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+    function init() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        pts = [];
+        for(let i=0; i<250; i++) {
+            const t = Math.acos(-1 + (2*i)/250), p = Math.sqrt(250*Math.PI)*t;
+            pts.push({x: Math.cos(p)*Math.sin(t), y: Math.sin(p)*Math.sin(t), z: Math.cos(t)});
         }
+    }
 
-        // --- NAVIGATION ---
-        function nav(id) {
-            playClick();
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+    let rot = 0;
+    function anim() {
+        ctx.clearRect(0,0,w,h);
+        rot += 0.006;
+        const r = Math.min(w,h) * 0.4, cx = w/2, cy = h/2;
+        pts.forEach(p => {
+            const x1 = p.x*Math.cos(rot) - p.z*Math.sin(rot);
+            const z1 = p.x*Math.sin(rot) + p.z*Math.cos(rot);
+            const scale = 1 / (2 - z1);
+            const px = x1 * r * scale + cx, py = p.y * r * scale + cy;
+            ctx.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
+            ctx.beginPath(); ctx.arc(px, py, 2, 0, 7); ctx.fill();
+        });
+        requestAnimationFrame(anim);
+    }
+
+    // --- ЗАГРУЗКА ---
+    let b = 0;
+    const i = setInterval(() => {
+        b += 2; document.getElementById('bar').style.width = b+'%';
+        if(b>=100) { clearInterval(i); nav('screen-slides'); }
+    }, 50);
+
+    // --- СЛАЙДЫ ЛОГИКА ---
+    let sIdx = 0;
+    const slides = [
+        {img: "👥➔⭕", title: "МЕХАНИКА 10+1", text: "11-й игрок встает в очередь. Его взнос делится между 10 игроками за столом."},
+        {img: "💰➔💎", title: "РАСПРЕДЕЛЕНИЕ", text: "Вы получаете прибыль мгновенно, как только тур завершен."},
+        {img: "🛡️", title: "ЗАЩИТА", text: "Если очереди нет - система откатывает тур без потерь. Все прозрачно."}
+    ];
+    function nextSlide() {
+        sIdx++;
+        if(sIdx < slides.length) {
+            document.getElementById('slide-img').innerHTML = slides[sIdx].img;
+            document.getElementById('slide-title').innerHTML = slides[sIdx].title;
+            document.getElementById('slide-text').innerHTML = slides[sIdx].text;
+        } else { nav('screen-menu'); }
+    }
+
+    // --- МЕСТА ЗА СТОЛОМ ---
+    function drawSeats() {
+        const c = document.getElementById('seats');
+        for(let i=0; i<10; i++) {
+            const ang = (i/10)*Math.PI*2;
+            const x = 150 + 130*Math.cos(ang), y = 100 + 70*Math.sin(ang);
+            const s = document.createElement('div');
+            s.className = 'seat' + (i===0 ? ' me' : '');
+            s.style.left = x+'px'; s.style.top = y+'px';
+            s.innerHTML = i===0 ? 'ВЫ' : '👤';
+            c.appendChild(s);
         }
+    }
 
-        // --- GLOBE ANIMATION ---
-        const canvas = document.getElementById('globe-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height, points = [];
-
-        function initGlobe() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-            points = [];
-            const count = 350;
-            for(let i=0; i<count; i++) {
-                const theta = Math.acos(-1 + (2 * i) / count);
-                const phi = Math.sqrt(count * Math.PI) * theta;
-                points.push({
-                    x: Math.cos(phi) * Math.sin(theta),
-                    y: Math.sin(phi) * Math.sin(theta),
-                    z: Math.cos(theta)
-                });
-            }
-        }
-
-        let rotation = 0;
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            rotation += 0.005;
-            const radius = Math.min(width, height) * 0.35;
-            const centerX = width / 2;
-            const centerY = height / 2;
-
-            points.forEach(p => {
-                const x1 = p.x * Math.cos(rotation) - p.z * Math.sin(rotation);
-                const z1 = p.x * Math.sin(rotation) + p.z * Math.cos(rotation);
-                const y1 = p.y;
-
-                const scale = 1 / (2 - z1);
-                const px = x1 * radius * scale + centerX;
-                const py = y1 * radius * scale + centerY;
-                const opacity = (z1 + 1) / 2;
-
-                ctx.fillStyle = `rgba(0, 210, 255, ${opacity})`;
-                ctx.beginPath();
-                ctx.arc(px, py, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            requestAnimationFrame(animate);
-        }
-
-        // --- PROGRESS BAR ---
-        let prog = 0;
-        const fill = document.getElementById('progress-fill');
-        const load = setInterval(() => {
-            prog += 2.5;
-            fill.style.width = prog + '%';
-            if(prog >= 100) { clearInterval(load); nav('slides-screen'); }
-        }, 60);
-
-        // --- TABLE RENDER (ISO SEATS) ---
-        function renderSeats() {
-            const container = document.getElementById('seats-container');
-            const centerX = window.innerWidth / 2;
-            const centerY = 150; // Inside 3D wrap
-            for(let i=0; i<10; i++) {
-                const angle = (i / 10) * Math.PI * 2;
-                const rX = 140; 
-                const rY = 80;
-                const x = Math.cos(angle) * rX + 130; 
-                const y = Math.sin(angle) * rY + 60;
-                
-                const seat = document.createElement('div');
-                seat.className = 'player-avatar' + (i === 4 ? ' me' : '');
-                seat.style.left = x + 'px';
-                seat.style.top = y + 'px';
-                seat.innerHTML = i === 4 ? 'ВЫ' : '👤';
-                container.appendChild(seat);
-            }
-        }
-
-        window.onload = () => { initGlobe(); animate(); renderSeats(); };
-        window.onresize = initGlobe;
-    </script>
+    window.onload = () => { init(); anim(); drawSeats(); };
+    window.onresize = init;
+</script>
 </body>
 </html>
