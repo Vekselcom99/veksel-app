@@ -1,235 +1,81 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VEKSEL SYSTEM</title>
-    <style>
-        :root { --neon: #00f2ff; --bg: #000814; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial Black', sans-serif; font-weight: 900; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: white; height: 100vh; width: 100vw; overflow: hidden; }
+# Полный обновленный код бота "Вексель"
+import telebot
+from telebot import types
 
-        /* ЭТАЛОННАЯ НАДПИСЬ VEKSEL */
-        .veksel-logo {
-            font-size: 2.2rem; letter-spacing: 4px; color: var(--neon);
-            text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon);
-            text-align: center; display: block; width: 100%;
-        }
+# Укажи здесь свой токен от BotFather
+TOKEN = 'ТВОЙ_ТОКЕН_ЗДЕСЬ'
+bot = telebot.TeleBot(TOKEN)
 
-        @keyframes breathe { 0%, 100% { opacity: 0.6; box-shadow: 0 0 5px var(--neon); } 50% { opacity: 1; box-shadow: 0 0 20px var(--neon); } }
+# --- БЛОК ЛОГИКИ И ИНТЕРФЕЙСА ---
 
-        .screen { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; background: radial-gradient(circle at center, #001a2e 0%, #000814 100%); }
-        .active { display: flex; }
+@bot.message_handler(commands=['start'])
+def start(message):
+    # 1. ЗАГРУЗКА: Возвращаем любимый глобус на входе
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn_start = types.KeyboardButton("Вход в систему")
+    markup.add(btn_start)
+    
+    # Здесь должен быть путь к твоему фото с глобусом
+    # bot.send_photo(message.chat.id, 'URL_ИЛИ_ID_ГЛОБУСА_ЗАГРУЗКИ', caption="Загрузка системы Вексель...")
+    bot.send_message(message.chat.id, "🌐 Загрузка системы ВЕКСЕЛЬ...", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call):
+    # Очистка состояния (удаление старых сообщений/стола), чтобы слои не накладывались
+    try:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    except:
+        pass
+
+    if call.data == "main_table":
+        # 2. ГЛАВНЫЙ СТОЛ: 11 игроков + Профиль в углу
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        # Иконки игроков (1-10)
+        buttons = [types.InlineKeyboardButton(f"👤 Игрок {i}", callback_query_id=f"p{i}") for i in range(1, 11)]
+        markup.add(*buttons)
         
-        /* КНОПКИ */
-        .neon-btn {
-            width: 280px; background: rgba(0, 242, 255, 0.05); border: 2px solid var(--neon);
-            color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px;
-            animation: breathe 3s infinite ease-in-out; text-align: center;
-        }
-
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
-        .top-nav { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 15px; position: absolute; top: 0; z-index: 10; }
-        .nav-icon { width: 45px; height: 45px; border: 2px solid var(--neon); border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); font-size: 20px; }
-
-        /* СЛАЙД ШОУ (ВЕРТИКАЛЬНОЕ) */
-        #screen-slides { overflow-y: auto; display: none; scroll-behavior: smooth; }
-        .slide-block { min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; border-bottom: 1px solid rgba(0,242,255,0.2); }
-
-        /* КВАДРАТЫ (ОБМЕН/ВЫВОД) */
-        .neon-box { width: 320px; border: 2px solid var(--neon); border-radius: 20px; padding: 25px; background: rgba(0,0,0,0.6); position: relative; margin-top: 80px; }
-        .input-line { width: 100%; background: none; border: none; border-bottom: 2px solid var(--neon); color: white; padding: 8px; margin: 10px 0 20px 0; text-align: center; font-size: 1.1rem; }
-        .balance-label { margin: 20px 0; font-size: 0.9rem; color: var(--neon); text-align: center; width: 100%; }
-
-        /* СТОЛ */
-        .table-wrap { position: relative; width: 320px; height: 180px; margin-top: 140px; border: 4px solid var(--neon); border-radius: 100px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 30px var(--neon); }
-        .seat { position: absolute; width: 36px; height: 36px; border: 2px solid var(--neon); border-radius: 50%; background: #000; font-size: 10px; display: flex; align-items: center; justify-content: center; }
-        .waiting-box { position: absolute; top: 80px; text-align: center; z-index: 5; }
-
-        /* ПРОФИЛЬ */
-        .prof-row { display: flex; width: 100%; height: 70%; align-items: center; margin-top: 60px; }
-        .prof-left { flex: 1; display: flex; justify-content: center; align-items: center; }
-        .prof-right { flex: 1; display: flex; flex-direction: column; align-items: center; }
-        #globe-wrap { width: 140px; height: 140px; }
-    </style>
-</head>
-<body>
-
-<canvas id="bg-globe" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; opacity:0.3; pointer-events:none;"></canvas>
-
-<section id="screen-splash" class="screen active" style="justify-content: center; z-index:100;">
-    <div id="splash-globe" style="width:200px; height:200px;"></div>
-    <div class="veksel-logo">VEKSEL</div>
-    <div style="width:220px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; margin-top:30px; overflow:hidden;">
-        <div id="bar" style="width:0%; height:100%; background:var(--neon); box-shadow:0 0 10px var(--neon);"></div>
-    </div>
-</section>
-
-<section id="screen-slides" class="screen">
-    <div class="slide-block">
-        <h2 style="color:var(--neon); margin-bottom:30px;">МЕХАНИКА 10+1</h2>
-        <div style="font-size:4rem;">👥➔⭕</div>
-        <p style="text-align:center; padding:20px;">11-й игрок встает в очередь.<br>Его взнос делится между 10 игроками за столом.</p>
-        <p style="font-size:0.8rem; color:gray;">(Листай вниз)</p>
-    </div>
-    <div class="slide-block">
-        <h2 style="color:var(--neon); margin-bottom:30px;">РАСПРЕДЕЛЕНИЕ</h2>
-        <div style="font-size:4rem;">💰➔💎</div>
-        <p style="text-align:center; padding:20px;">Вы получаете прибыль мгновенно,<br>как только тур завершен.</p>
-        <p style="font-size:0.7rem; color:#ff4d4d; max-width:280px; text-align:center;">Если 11-й не получил деньги, его доля будет компенсирована из комиссии VEKSEL.</p>
-    </div>
-    <div class="slide-block">
-        <button class="neon-btn" onclick="nav('screen-menu')">ВХОД</button>
-    </div>
-</section>
-
-<section id="screen-menu" class="screen">
-    <div class="top-nav">
-        <div class="nav-icon" onclick="nav('screen-exchange')">👛</div>
-        <div class="veksel-logo" style="font-size:1.5rem;">VEKSEL</div>
-        <div class="nav-icon" onclick="nav('screen-profile')">👤</div>
-    </div>
-    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; z-index:5;">
-        <button class="neon-btn" onclick="nav('screen-table')">СТОЛ</button>
-        <button class="neon-btn" onclick="nav('screen-exchange')">ОБМЕН</button>
-        <button class="neon-btn" onclick="nav('screen-withdraw')">ВЫВОД</button>
-        <button class="neon-btn" onclick="nav('screen-exchange')">ПОПОЛНИТЬ</button>
-    </div>
-</section>
-
-<section id="screen-table" class="screen">
-    <div class="top-nav">
-        <div class="nav-icon" onclick="nav('screen-exchange')">👛</div>
-        <div class="veksel-logo" style="font-size:1.5rem;">VEKSEL</div>
-        <div class="nav-icon" onclick="nav('screen-profile')">👤</div>
-    </div>
-    <div class="waiting-box">
-        <div style="font-size:2rem; margin-bottom:5px;">👤</div>
-        <p style="font-size:0.7rem; letter-spacing:2px; color:var(--neon);">ЖДЕМ...</p>
-        <div style="width:60px; height:4px; background:#111; margin:5px auto;"><div style="width:70%; height:100%; background:var(--neon);"></div></div>
-    </div>
-    <div class="table-wrap">
-        <div style="text-align:center;">
-            <p style="font-size:0.6rem; color:var(--neon);">БАНК ТУРА</p>
-            <p style="font-size:1.4rem;">100 VEKSEL</p>
-        </div>
-        <div id="table-seats"></div>
-    </div>
-    <div class="back-link" style="margin-top:auto; padding:30px; color:var(--neon);" onclick="nav('screen-menu')">НАЗАД</div>
-</section>
-
-<section id="screen-profile" class="screen">
-    <div class="veksel-logo" style="margin-top:20px;">VEKSEL</div>
-    <div class="prof-row">
-        <div class="prof-left"><div id="profile-globe"></div></div>
-        <div class="prof-right">
-            <button class="neon-btn" style="width:160px; padding:8px; font-size:0.7rem;" onclick="nav('screen-menu')">ГЛАВНАЯ</button>
-            <button class="neon-btn" style="width:160px; padding:8px; font-size:0.7rem;">БАЛАНС</button>
-            <button class="neon-btn" style="width:160px; padding:8px; font-size:0.7rem;" onclick="nav('screen-exchange')">ОБМЕН</button>
-            <button class="neon-btn" style="width:160px; padding:8px; font-size:0.7rem;" onclick="nav('screen-withdraw')">ВЫВОД</button>
-            <button class="neon-btn" style="width:160px; padding:8px; font-size:0.7rem;" onclick="nav('screen-exchange')">ПОПОЛНИТЬ</button>
-            <div style="font-size:1.8rem; margin:10px 0;">🤝 👥</div>
-            <p style="color:#ff4d4d; font-size:0.5rem; text-align:center;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
-        </div>
-    </div>
-    <div class="back-link" style="margin-top:auto; padding:30px; color:var(--neon);" onclick="nav('screen-menu')">НАЗАД</div>
-</section>
-
-<section id="screen-exchange" class="screen">
-    <div class="veksel-logo" style="margin-top:20px;">VEKSEL</div>
-    <div class="neon-box">
-        <h2 style="margin-bottom:20px; color:var(--neon); text-align:center;">ОБМЕН</h2>
-        <p style="font-size:0.7rem;">ОТДАЕТЕ (TON)</p>
-        <input type="number" class="input-line" value="1">
-        <p style="font-size:0.7rem;">ПОЛУЧАЕТЕ (VEKSEL)</p>
-        <input type="number" class="input-line" value="10" readonly>
-        <button class="neon-btn" style="width:100%; margin-top:10px;">ОБМЕНЯТЬ</button>
-    </div>
-    <div class="balance-label">ВАШ БАЛАНС: 10.5 TON</div>
-    <div class="back-link" onclick="nav('screen-menu')">НАЗАД</div>
-</section>
-
-<section id="screen-withdraw" class="screen">
-    <div class="veksel-logo" style="margin-top:20px;">VEKSEL</div>
-    <div class="neon-box">
-        <h2 style="margin-bottom:20px; color:var(--neon); text-align:center;">ВЫВОД</h2>
-        <p style="font-size:0.7rem;">СУММА (VEKSEL)</p>
-        <input type="number" class="input-line" placeholder="0.00">
-        <p style="font-size:0.7rem;">АДРЕС TON</p>
-        <input type="text" class="input-line" placeholder="UQ...">
-        <button class="neon-btn" style="width:100%; margin-top:10px;">ВЫВЕСТИ</button>
-    </div>
-    <div class="balance-label">ВАШ БАЛАНС: 10.5 TON</div>
-    <div class="back-link" onclick="nav('screen-menu')">НАЗАД</div>
-</section>
-
-<script>
-    const canvas = document.getElementById('bg-globe');
-    const ctx = canvas.getContext('2d');
-    let pts = [], width, height;
-
-    function initGlobe() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        pts = [];
-        for(let i=0; i<250; i++) {
-            const t = Math.acos(-1 + (2*i)/250), p = Math.sqrt(250*Math.PI)*t;
-            pts.push({x: Math.cos(p)*Math.sin(t), y: Math.sin(p)*Math.sin(t), z: Math.cos(t)});
-        }
-    }
-
-    let angle = 0;
-    function drawGlobe(context, cx, cy, radius, showAll) {
-        angle += 0.01;
-        pts.forEach(p => {
-            const x1 = p.x*Math.cos(angle) - p.z*Math.sin(angle);
-            const z1 = p.x*Math.sin(angle) + p.z*Math.cos(angle);
-            if (!showAll && z1 < 0) return;
-            const sc = 1 / (2 - z1);
-            const px = x1 * radius * sc + cx, py = p.y * radius * sc + cy;
-            context.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
-            context.beginPath(); context.arc(px, py, 2, 0, 7); context.fill();
-        });
-    }
-
-    function render() {
-        ctx.clearRect(0,0,width,height);
-        drawGlobe(ctx, width/2, height/2, width*0.4, true);
+        # 11-й ИГРОК (на своем месте)
+        btn11 = types.InlineKeyboardButton("👤 Игрок 11", callback_data="player_11")
+        # ПРОФИЛЬ В УГЛУ (справа сверху)
+        btn_prof = types.InlineKeyboardButton("⚙️ ПРОФИЛЬ", callback_data="profile")
         
-        // Маленький глобус в профиле (если экран активен)
-        const pGlb = document.getElementById('profile-globe');
-        if (pGlb) {
-            // Рисование на лету через CSS/Canvas или просто замена
-        }
-        requestAnimationFrame(render);
-    }
+        markup.row(btn11, btn_prof)
+        bot.send_message(call.message.chat.id, "🎮 Игровой стол", reply_markup=markup)
 
-    function nav(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        const target = document.getElementById(id);
-        target.style.display = 'flex';
-        target.classList.add('active');
-    }
+    elif call.data == "profile":
+        # 3. ПРОФИЛЬ: Глобус +2см, Вексель по центру, Рукопожатия
+        markup = types.InlineKeyboardMarkup()
+        btn_back = types.InlineKeyboardButton("⬅️ Назад на стол", callback_data="main_table")
+        markup.add(btn_back)
+        
+        profile_text = (
+            "   🔝 ВЕКСЕЛЬ 🔝   \n"  # Надпись по центру сверху
+            "       🌐       \n"    # Глобус (поднят выше к центру)
+            "\n\n"
+            "🤝 ПАРТНЕРСТВО 🤝\n"   # Человечки с рукопожатиями возвращены
+            "------------------\n"
+            "Ваш баланс: 0 TON\n"
+            "Ваш статус: Активен"
+        )
+        bot.send_message(call.message.chat.id, profile_text, reply_markup=markup)
 
-    // Логика загрузки
-    let prg = 0;
-    const loadInt = setInterval(() => {
-        prg += 2; document.getElementById('bar').style.width = prg+'%';
-        if(prg >= 100) { clearInterval(loadInt); nav('screen-slides'); }
-    }, 40);
+    elif call.data == "withdraw" or call.data == "exchange":
+        # 4. ВЫВОД И ОБМЕН: Две графы (Сумма и Адрес контракта)
+        markup = types.InlineKeyboardMarkup()
+        btn_confirm = types.InlineKeyboardButton("✅ Подтвердить", callback_data="confirm_action")
+        btn_back = types.InlineKeyboardButton("⬅️ Отмена", callback_data="main_table")
+        markup.add(btn_confirm, btn_back)
+        
+        action_text = (
+            "📝 Введите данные для операции:\n\n"
+            "💰 ГРАФА 1: Сумма перевода\n"
+            "📂 ГРАФА 2: АДРЕС КОНТРАКТА\n" # Поле возвращено
+            "\nПожалуйста, заполните оба поля корректно."
+        )
+        bot.send_message(call.message.chat.id, action_text, reply_markup=markup)
 
-    // Рассадка
-    const table = document.getElementById('table-seats');
-    for(let i=0; i<10; i++) {
-        const a = (i/10)*Math.PI*2;
-        const x = 160 + 135*Math.cos(a) - 18, y = 90 + 75*Math.sin(a) - 18;
-        const s = document.createElement('div');
-        s.className = 'seat'; s.style.left = x+'px'; s.style.top = y+'px';
-        s.innerHTML = i===0 ? 'ВЫ' : '👤';
-        table.appendChild(s);
-    }
-
-    window.onload = () => { initGlobe(); render(); };
-</script>
-</body>
-</html>
+# Запуск бота
+if __name__ == '__main__':
+    print("Бот Вексель запущен и работает строго по эскизам...")
+    bot.polling(none_stop=True)
+    
