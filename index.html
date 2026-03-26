@@ -4,205 +4,158 @@ import sqlite3
 import time
 import requests
 import logging
-import random
+import json
 
-# --- КОНФИГУРАЦИЯ ---
+# --- CONFIGURATION ---
 TOKEN = '8722843634:AAG2oO7m79QinBlWJkDnkyq9oEKNewzBNho'
 APP_URL = "https://vekselcom99.github.io/veksel-app/"
+ADMIN_ID = 0  # Сюда можно вписать твой ID
+
 bot = telebot.TeleBot(TOKEN)
 
-# Настройка логирования для отладки в Pydroid 3
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-# --- БАЗА ДАННЫХ (ПОЛНАЯ СТРУКТУРА) ---
+# --- DATABASE SETUP ---
 def init_db():
-    conn = sqlite3.connect('veksel_main.db')
+    conn = sqlite3.connect('veksel.db', check_same_thread=False)
     cursor = conn.cursor()
-    # Таблица пользователей
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            username TEXT,
-            first_name TEXT,
-            referer_id INTEGER,
-            balance REAL DEFAULT 0.0,
-            level INTEGER DEFAULT 1,
-            table_number INTEGER DEFAULT 0,
-            reg_date TEXT
-        )
-    ''')
-    # Таблица очередей на столах
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tables (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            table_type TEXT,
-            position INTEGER,
-            status TEXT DEFAULT 'active'
-        )
-    ''')
-    # Таблица транзакций
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS payments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            amount REAL,
-            tx_hash TEXT UNIQUE,
-            status TEXT,
-            created_at TEXT
-        )
-    ''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+        (user_id INTEGER PRIMARY KEY, username TEXT, balance REAL DEFAULT 0, 
+        referer_id INTEGER, level INTEGER DEFAULT 1, reg_date TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS queue 
+        (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, table_type TEXT, status TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS transactions 
+        (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, amount REAL, type TEXT, hash TEXT, date TEXT)''')
     conn.commit()
     conn.close()
 
 init_db()
 
-# --- УСТАНОВКА КНОПКИ МЕНЮ ---
-def set_main_menu():
-    try:
-        bot.set_chat_menu_button(
-            menu_button=types.MenuButtonWebApp(
-                type="web_app", 
-                text="Play", 
-                web_app=types.WebAppInfo(url=APP_URL)
-            )
+# --- MENU INITIALIZATION ---
+try:
+    bot.set_chat_menu_button(
+        menu_button=types.MenuButtonWebApp(
+            type="web_app", 
+            text="Play", 
+            web_app=types.WebAppInfo(url=APP_URL)
         )
-    except Exception as e:
-        logging.error(f"Menu error: {e}")
+    )
+except Exception:
+    pass
 
-set_main_menu()
+# --- CORE LOGIC FUNCTIONS ---
+def get_user(user_id):
+    conn = sqlite3.connect('veksel.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
 
-# --- ЛОГИКА РЕФЕРАЛОВ ---
-def add_user(user_id, username, first_name, ref_id=None):
-    conn = sqlite3.connect('veksel_main.db')
+def register_user(user_id, username, ref_id=None):
+    conn = sqlite3.connect('veksel.db')
     cursor = conn.cursor()
     cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
     if cursor.fetchone() is None:
-        reg_date = time.strftime('%Y-%m-%d %H:%M:%S')
-        cursor.execute(
-            "INSERT INTO users (user_id, username, first_name, referer_id, reg_date) VALUES (?, ?, ?, ?, ?)",
-            (user_id, username, first_name, ref_id, reg_date)
-        )
+        date = time.strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute("INSERT INTO users (user_id, username, referer_id, reg_date) VALUES (?, ?, ?, ?)", 
+                       (user_id, username, ref_id, date))
         conn.commit()
     conn.close()
 
-# --- ОБРАБОТЧИК /START ---
+# --- HANDLERS ---
 @bot.message_handler(commands=['start'])
-def send_welcome(message):
-    user_id = message.from_user.id
-    username = message.from_user.username
-    first_name = message.from_user.first_name
+def start_cmd(message):
+    uid = message.from_user.id
+    uname = message.from_user.username
     
-    # Извлекаем ID реферера из команды /start (если есть)
-    ref_id = None
-    if len(message.text.split()) > 1:
+    # Реферальная система
+    args = message.text.split()
+    referrer = None
+    if len(args) > 1:
         try:
-            ref_id = int(message.text.split()[1])
-            if ref_id == user_id: ref_id = None
+            referrer = int(args[1])
+            if referrer == uid: referrer = None
         except:
             pass
             
-    add_user(user_id, username, first_name, ref_id)
+    register_user(uid, uname, referrer)
     
     markup = types.InlineKeyboardMarkup(row_width=1)
-    web_app = types.WebAppInfo(url=APP_URL)
+    web_info = types.WebAppInfo(url=APP_URL)
     
-    btn_web = types.InlineKeyboardButton("🌐 ОТКРЫТЬ VEKSEL", web_app=web_app)
-    btn_help = types.InlineKeyboardButton("📖 Инструкция", callback_data="help_info")
-    btn_stats = types.InlineKeyboardButton("📊 Моя статистика", callback_data="my_stats")
+    btn_main = types.InlineKeyboardButton("ОТКРЫТЬ VEKSEL 🌐", web_app=web_info)
+    btn_stat = types.InlineKeyboardButton("👤 Мой Профиль", callback_data="view_profile")
+    btn_info = types.InlineKeyboardButton("📖 О Системе", callback_data="view_info")
     
-    markup.add(btn_web, btn_stats, btn_help)
+    markup.add(btn_main, btn_stat, btn_info)
     
-    welcome_msg = (
-        f"<b>Приветствуем в системе VEKSEL, {first_name}!</b>\n\n"
-        f"Это децентрализованная площадка распределения TON.\n"
-        f"Твой ID: <code>{user_id}</code>\n"
-        f"Твой статус: <b>Участник</b>\n\n"
-        f"Нажми кнопку ниже, чтобы запустить интерфейс столов."
+    text = (
+        "<b>VEKSEL SYSTEM</b>\n\n"
+        "Добро пожаловать в децентрализованную очередь.\n"
+        "Ваш персональный ID: <code>{}</code>\n\n"
+        "Используйте кнопку PLAY или кнопку ниже для входа.".format(uid)
     )
     
-    bot.send_message(message.chat.id, welcome_msg, parse_mode="HTML", reply_markup=markup)
+    bot.send_message(message.chat.id, text, parse_mode="HTML", reply_markup=markup)
 
-# --- ОБРАБОТКА CALLBACK (ЛОГИКА СТОЛОВ) ---
 @bot.callback_query_handler(func=lambda call: True)
-def handle_callbacks(call):
-    user_id = call.from_user.id
+def handle_calls(call):
+    uid = call.from_user.id
     
-    if call.data == "my_stats":
-        conn = sqlite3.connect('veksel_main.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT balance, referer_id, reg_date FROM users WHERE user_id = ?", (user_id,))
-        data = cursor.fetchone()
-        conn.close()
-        
-        if data:
-            stats_text = (
-                f"📊 <b>Твоя статистика:</b>\n\n"
-                f"💰 Баланс: {data[0]} TON\n"
-                f"👤 Пригласил: {data[1] if data[1] else 'Нет'}\n"
-                f"📅 В системе с: {data[2]}\n"
-            )
+    if call.data == "view_profile":
+        u = get_user(uid)
+        if u:
+            profile_text = (
+                "<b>📊 ВАШ ПРОФИЛЬ</b>\n\n"
+                "💰 Баланс: <code>{} TON</code>\n"
+                "👥 Реферер: <code>{}</code>\n"
+                "📅 Регистрация: <code>{}</code>\n"
+                "------------------\n"
+                "🤝 ПАРТНЕРСТВО ВКЛЮЧЕНО"
+            ).format(u[2], u[3] if u[3] else "Нет", u[5])
+            
             markup = types.InlineKeyboardMarkup()
-            markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="back_home"))
-            bot.edit_message_text(stats_text, call.message.chat.id, call.message.message_id, parse_mode="HTML", reply_markup=markup)
+            markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="to_main"))
+            bot.edit_message_text(profile_text, call.message.chat.id, call.message.message_id, 
+                                  parse_mode="HTML", reply_markup=markup)
 
-    elif call.data == "help_info":
-        help_text = (
-            "<b>Как работает VEKSEL?</b>\n\n"
-            "1. Вы активируете стол за 1 TON.\n"
-            "2. Ваша сумма распределяется между вышестоящими.\n"
-            "3. Когда за вами заходят новые участники, вы получаете выплаты.\n\n"
-            "<i>Все выплаты приходят на ваш внутренний кошелек бота.</i>"
+    elif call.data == "view_info":
+        info_text = (
+            "<b>ИНФОРМАЦИЯ VEKSEL</b>\n\n"
+            "Система работает по принципу живой очереди.\n"
+            "Вход в первый стол: 1 TON.\n"
+            "Выход при закрытии: 7 TON.\n\n"
+            "Автоматическое распределение по структуре."
         )
         markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="back_home"))
-        bot.edit_message_text(help_text, call.message.chat.id, call.message.message_id, parse_mode="HTML", reply_markup=markup)
+        markup.add(types.InlineKeyboardButton("⬅️ Назад", callback_data="to_main"))
+        bot.edit_message_text(info_text, call.message.chat.id, call.message.message_id, 
+                                  parse_mode="HTML", reply_markup=markup)
 
-    elif call.data == "back_home":
-        # Код возврата в главное меню (аналог команды /start)
+    elif call.data == "to_main":
         markup = types.InlineKeyboardMarkup(row_width=1)
-        web_app = types.WebAppInfo(url=APP_URL)
+        web_info = types.WebAppInfo(url=APP_URL)
         markup.add(
-            types.InlineKeyboardButton("🌐 ОТКРЫТЬ VEKSEL", web_app=web_app),
-            types.InlineKeyboardButton("📊 Статистика", callback_data="my_stats")
+            types.InlineKeyboardButton("ОТКРЫТЬ VEKSEL 🌐", web_app=web_info),
+            types.InlineKeyboardButton("👤 Мой Профиль", callback_data="view_profile")
         )
         bot.edit_message_text("Выберите раздел:", call.message.chat.id, call.message.message_id, reply_markup=markup)
 
-# --- ЛОГИКА ПОПОЛНЕНИЯ (ПРИМЕР 350+ СТРОК) ---
-@bot.message_handler(func=lambda m: m.text == "Пополнить 💎")
-def deposit_init(message):
-    bot.send_message(message.chat.id, "Отправьте 1 TON на кошелек системы:\n<code>UQ...ВАШ_КОШЕЛЕК</code>\n\nЗатем пришлите хэш транзакции.")
+# --- WEBAPP DATA RECEIVE ---
+@bot.message_handler(content_types=['web_app_data'])
+def web_app_handler(message):
+    data = message.web_app_data.data
+    # Здесь логика обработки данных из WebApp (выплаты, столы)
+    bot.send_message(message.chat.id, f"Получены данные: {data}")
 
-# Функция проверки транзакции (имитация длинной логики)
-def process_payment(user_id, tx_hash):
-    # Здесь в рабочем коде идет запрос к TON API
-    # Проверка суммы и подтверждений
-    time.sleep(2)
-    return True
-
-# --- БЛОК АВТОМАТИЧЕСКОГО РАСПРЕДЕЛЕНИЯ (ГДЕ МНОГО КОДА) ---
-def distribute_profit(table_id):
-    conn = sqlite3.connect('veksel_main.db')
-    cursor = conn.cursor()
-    # Логика поиска 7 человек над пользователем
-    # Начисление % на баланс каждому
-    # Проверка закрытия стола
-    conn.commit()
-    conn.close()
-
-# --- ЗАПУСК БОТА С ЗАЩИТОЙ ОТ ВЫЛЕТОВ ---
-def run_forever():
+# --- SYSTEM LOOP ---
+def main():
+    print(">>> VEKSEL BOT IS ACTIVE <<<")
     while True:
         try:
-            print(">>> СИСТЕМА VEKSEL ЗАПУЩЕНА И ГОТОВА <<<")
-            bot.polling(none_stop=True, interval=0, timeout=60)
+            bot.polling(none_stop=True, interval=0, timeout=20)
         except Exception as e:
-            logging.error(f"Ошибка в цикле: {e}")
-            time.sleep(10) # Пауза перед перезапуском, чтобы не забанили
+            time.sleep(5)
 
 if __name__ == '__main__':
-    run_forever()
-                
+    main()
+        
