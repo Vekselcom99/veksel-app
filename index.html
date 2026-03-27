@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VEKSEL FULL FIXED</title>
+    <title>VEKSEL RESTORED EDITION</title>
     <style>
         :root { --neon: #00f2ff; --bg: #000814; --pink: #ff007a; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; font-weight: bold; -webkit-tap-highlight-color: transparent; }
@@ -18,19 +18,15 @@
         .top-nav { width: 100%; display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; z-index: 200; }
         .icon-box { width: 45px; height: 45px; border: 1px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); cursor: pointer; }
 
-        /* Стол */
-        .table-area { position: relative; width: 300px; height: 160px; border: 4px solid var(--neon); border-radius: 100px; margin-top: 30px; box-shadow: inset 0 0 20px var(--neon); }
-        .player-node { position: absolute; width: 32px; height: 32px; border: 2px solid var(--neon); border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 0 10px var(--neon); }
-        
-        /* Поля ввода */
-        .main-frame { border: 2px solid var(--neon); padding: 20px; border-radius: 20px; text-align:center; width: 90%; background: rgba(0,0,0,0.6); }
-        .input-line { width: 100%; background: none; border: none; border-bottom: 1px solid var(--neon); color: white; margin: 5px 0 15px; text-align: center; font-size: 18px; outline: none; }
+        .main-frame { border: 2px solid var(--neon); padding: 25px; border-radius: 20px; text-align:center; width: 92%; background: rgba(0,0,0,0.6); box-shadow: 0 0 20px rgba(0,242,255,0.2); }
+        .input-line { width: 100%; background: none; border: none; border-bottom: 1px solid rgba(0,242,255,0.5); color: white; margin: 5px 0 15px; text-align: center; font-size: 18px; outline: none; }
 
-        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); cursor: pointer; text-transform: uppercase; font-size: 14px; text-decoration: underline; }
+        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); cursor: pointer; text-transform: uppercase; font-size: 14px; text-decoration: none; letter-spacing: 1px; }
         
-        #load-progress { width: 200px; height: 4px; background: #111; border-radius: 2px; margin-top: 20px; overflow: hidden; }
-        #load-fill { width: 0%; height: 100%; background: var(--neon); }
+        #load-fill { width: 0%; height: 100%; background: var(--neon); transition: width 0.1s; }
         canvas { filter: drop-shadow(0 0 10px var(--neon)); }
+        
+        .player-node { position: absolute; width: 32px; height: 32px; border: 2px solid var(--neon); border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 0 10px var(--neon); }
     </style>
 </head>
 <body onclick="playClick()">
@@ -38,7 +34,7 @@
 <section id="splash" class="screen active" style="justify-content: center;">
     <canvas class="globe-canvas" width="220" height="220"></canvas>
     <div class="veksel-header">VEKSEL</div>
-    <div id="load-progress"><div id="load-fill"></div></div>
+    <div style="width: 200px; height: 4px; background: #111; border-radius: 2px; overflow: hidden;"><div id="load-fill"></div></div>
 </section>
 
 <section id="menu" class="screen">
@@ -81,7 +77,7 @@
         <div style="width:32px; height:32px; border:2px solid var(--neon); border-radius:50%; margin: 0 auto 5px; display:flex; align-items:center; justify-content:center;">👤</div>
         <p style="font-size: 10px; color: var(--neon);">ЖДЕМ...</p>
     </div>
-    <div class="table-area">
+    <div style="position: relative; width: 300px; height: 160px; border: 4px solid var(--neon); border-radius: 100px; margin-top: 30px; box-shadow: inset 0 0 20px var(--neon);">
         <div style="position:absolute; width:100%; text-align:center; top:42%; font-size:14px;">100 VEKSEL</div>
         <div id="dynamic-seats"></div>
     </div>
@@ -92,44 +88,46 @@
 <section id="withdraw" class="screen">
     <canvas class="globe-canvas" width="150" height="150" style="margin-top:20px;"></canvas>
     <div class="main-frame">
-        <h2 style="color:var(--neon); margin-bottom: 15px;">ВЫВОД</h2>
-        <p style="font-size:10px; opacity: 0.8;">СУММА (TON)</p>
+        <h2 style="color:var(--neon); margin-bottom: 20px; letter-spacing: 2px;">ВЫВОД</h2>
+        <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Сумма (TON)</p>
         <input type="number" placeholder="0.00" class="input-line">
-        <p style="font-size:10px; opacity: 0.8;">АДРЕС КОШЕЛЬКА</p>
+        <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Адрес вашего кошелька</p>
         <input type="text" placeholder="UQ..." class="input-line">
-        <button class="neon-btn" style="width: 100%; border-color: var(--pink);">ПОДТВЕРДИТЬ</button>
+        <button class="neon-btn" style="width: 100%; margin-top: 10px; border-color: var(--pink);">Подтвердить</button>
     </div>
+    <p style="margin-top: 20px; color: var(--neon); font-size: 14px;">ВАШ ТЕКУЩИЙ БАЛАНС: 10.5 TON</p>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
 <section id="exchange" class="screen">
     <canvas class="globe-canvas" width="150" height="150" style="margin-top:20px;"></canvas>
     <div class="main-frame">
-        <h2 style="color:var(--neon); margin-bottom: 20px;">ОБМЕН</h2>
+        <h2 style="color:var(--neon); margin-bottom: 20px; letter-spacing: 2px;">ОБМЕН</h2>
         <div style="display:flex; justify-content: space-between; align-items:center;">
             <div style="text-align:left; flex:1;">
                 <p style="font-size:9px; opacity:0.7;">ОТДАЕТЕ (TON)</p>
-                <input type="number" value="1.00" class="input-line" style="text-align:left;">
+                <input type="number" value="1.00" class="input-line" style="text-align:left; font-size:22px;">
             </div>
-            <div style="font-size:20px; color:var(--pink);">👛</div>
+            <div style="font-size:20px; color:var(--pink); margin-left:10px;">👛</div>
         </div>
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-top:10px;">
+        <div style="height:1px; background:rgba(0,242,255,0.3); margin: 5px 0 15px;"></div>
+        <div style="display:flex; justify-content: space-between; align-items:center;">
             <div style="text-align:left; flex:1;">
                 <p style="font-size:9px; opacity:0.7;">ПОЛУЧАЕТЕ (VEKSEL)</p>
-                <input type="number" value="100.00" class="input-line" style="text-align:left;">
+                <input type="number" value="100.00" class="input-line" style="text-align:left; font-size:22px;">
             </div>
-            <div style="font-size:20px; color:var(--neon);">👤</div>
+            <div style="font-size:20px; color:var(--neon); margin-left:10px;">👤</div>
         </div>
-        <button class="neon-btn" style="width:100%; border-color: var(--pink);">ОБМЕНЯТЬ</button>
+        <button class="neon-btn" style="width:100%; border-color: var(--pink); margin-top:10px;">ОБМЕНЯТЬ</button>
     </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
 <section id="rules" class="screen">
-    <div class="veksel-header">ПРАВИЛА</div>
-    <div style="text-align: center; padding: 20px; flex: 1;">
-        <div style="font-size: 40px; margin-bottom: 20px;">👥 ➔ ⭕</div>
-        <p style="font-size: 14px;">Взнос 10 TON. Тур стартует при 11 игроках.</p>
+    <div class="veksel-header">МЕХАНИКА</div>
+    <div style="text-align: center; padding: 20px; flex: 1; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size: 45px; margin-bottom: 20px;">👥 ➔ ⭕</div>
+        <p style="font-size: 15px;">Тур запускается при 11 игроках.</p>
     </div>
     <div class="back-btn" onclick="show('profile')">НАЗАД</div>
 </section>
@@ -148,10 +146,9 @@
     function show(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'table') renderTable(6); // Рендерим 6 человек при открытии стола
+        if(id === 'table') renderTable(10); // Показываем 10 человек для теста
     }
 
-    // ГЛОБУС ВЕЗДЕ
     let pts = [];
     for(let i=0; i<120; i++) {
         const t = Math.acos(-1 + (2*i)/120), p = Math.sqrt(120*Math.PI)*t;
@@ -178,7 +175,6 @@
         requestAnimationFrame(draw);
     }
 
-    // ДИНАМИЧЕСКИЙ СТОЛ
     function renderTable(count) {
         const layer = document.getElementById('dynamic-seats');
         layer.innerHTML = '';
@@ -189,12 +185,11 @@
             const p = document.createElement('div');
             p.className = 'player-node';
             p.style.left = x + 'px'; p.style.top = y + 'px';
-            p.innerHTML = i === 0 ? 'Вы' : '👤';
+            p.innerHTML = i === 4 ? 'Вы' : '👤'; // "Вы" на 5-й позиции для примера
             layer.appendChild(p);
         }
     }
 
-    // ЗАГРУЗКА
     let prg = 0;
     const loader = setInterval(() => {
         prg += 2;
