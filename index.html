@@ -3,46 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VEKSEL FINAL VERSION</title>
+    <title>VEKSEL GITHUB EDITION</title>
     <style>
-        :root { --neon: #00f2ff; --bg: #000814; }
+        :root { --neon: #00f2ff; --bg: #000814; --pink: #ff007a; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; font-weight: bold; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: white; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* Изоляция экранов - решение проблемы "каши" */
-        .screen { 
-            display: none; 
-            position: absolute; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            flex-direction: column; 
-            align-items: center; 
-            background: radial-gradient(circle at center, #003d5c 0%, #000814 100%); 
-            z-index: 10; 
-        }
+        .screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; flex-direction: column; align-items: center; background: radial-gradient(circle at center, #003d5c 0%, #000814 100%); z-index: 10; }
         .active { display: flex !important; z-index: 100; }
 
         .veksel-header { font-size: 2.2rem; letter-spacing: 6px; color: var(--neon); text-shadow: 0 0 15px var(--neon); margin: 60px 0 30px; text-align: center; }
         
         .neon-btn {
             width: 280px; background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); 
-            color: white; padding: 16px; border-radius: 12px; margin-bottom: 15px; 
-            text-transform: uppercase; text-align: center; cursor: pointer; box-shadow: 0 0 10px rgba(0,242,255,0.1);
+            color: white; padding: 14px; border-radius: 12px; margin-bottom: 12px; 
+            text-transform: uppercase; text-align: center; cursor: pointer; font-size: 14px;
         }
 
         .top-nav { width: 100%; display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; z-index: 200; }
-        .icon-box { width: 45px; height: 45px; border: 1px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); }
+        .icon-box { width: 45px; height: 45px; border: 1px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); box-shadow: 0 0 10px rgba(0,242,255,0.3); }
 
-        /* Стол по эскизу */
+        /* Стол */
         .table-area { position: relative; width: 280px; height: 140px; border: 4px solid var(--neon); border-radius: 100px; margin-top: 50px; box-shadow: inset 0 0 20px var(--neon); }
         .player { position: absolute; width: 32px; height: 32px; border: 2px solid var(--neon); border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; }
         
-        /* Глобус в Профиле */
-        #globe-profile { width: 160px; height: 160px; background: transparent; }
+        /* Вывод */
+        .input-line { width: 100%; background: none; border: none; border-bottom: 1px solid var(--neon); color: white; margin: 10px 0 20px; text-align: center; font-size: 18px; outline: none; }
 
-        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); text-decoration: underline; cursor: pointer; }
+        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); text-decoration: underline; cursor: pointer; letter-spacing: 1px; }
         
-        /* Полоса загрузки */
         #load-progress { width: 200px; height: 4px; background: #111; border-radius: 2px; margin-top: 20px; overflow: hidden; }
         #load-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); }
     </style>
@@ -69,52 +58,61 @@
 
 <section id="profile" class="screen">
     <div class="veksel-header" style="margin-top:20px;">VEKSEL</div>
-    <div style="display:flex; width:100%; align-items:center; padding: 20px; justify-content: center;">
-        <canvas id="globe-profile" width="160" height="160"></canvas>
-        <div style="display:flex; flex-direction:column; gap: 12px; margin-left: 15px;">
-            <button class="neon-btn" style="width:130px; padding:10px; font-size:12px;" onclick="show('menu')">ГЛАВНАЯ</button>
-            <button class="neon-btn" style="width:130px; padding:10px; font-size:12px;" onclick="show('rules')">ПРАВИЛА</button>
+    <div style="display:flex; width:100%; align-items:center; padding: 10px; justify-content: center;">
+        <canvas id="globe-profile" width="150" height="150"></canvas>
+        <div style="display:flex; flex-direction:column; margin-left: 10px;">
+            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('menu')">ГЛАВНАЯ</button>
+            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('withdraw')">ВЫВОД</button>
+            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('exchange')">ПОПОЛНЕНИЯ</button>
+            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('exchange')">ОБМЕН</button>
+            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('rules')">ПРАВИЛА</button>
         </div>
     </div>
-    <div style="text-align: center; margin-top: 20px;">
-        <p style="font-size: 20px;">🤝 👥</p>
-        <p style="color: #ff4d4d; font-size: 10px; margin-top: 15px; letter-spacing: 1px;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
+    <div style="text-align: center; margin-top: 15px;">
+        <p style="font-size: 22px;">🤝 👥</p>
+        <p style="color: #ff4d4d; font-size: 9px; margin-top: 10px; letter-spacing: 1px;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
     </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
 <section id="table" class="screen">
-    <div class="top-nav"><div></div><div class="icon-box" onclick="show('profile')">👤</div></div>
+    <div class="top-nav">
+        <div class="icon-box" style="border-color: var(--pink);" onclick="show('exchange')">👛</div>
+        <div class="icon-box" onclick="show('profile')">👤</div>
+    </div>
     <div style="margin-top: 80px; text-align: center;">
         <div class="player" style="position:static; margin: 0 auto 5px;">👤</div>
-        <p style="font-size: 10px; color: var(--neon); letter-spacing: 2px;">ЖДЕМ...</p>
+        <p style="font-size: 10px; color: var(--neon);">ЖДЕМ...</p>
     </div>
     <div class="table-area">
-        <div style="position:absolute; width:100%; text-align:center; top:42%; font-size:14px; letter-spacing:1px;">100 VEKSEL</div>
+        <div style="position:absolute; width:100%; text-align:center; top:42%; font-size:14px;">100 VEKSEL</div>
         <div id="seats"></div>
     </div>
-    <div style="margin-top: 30px; border: 1px solid var(--neon); padding: 10px 25px; border-radius: 10px; background: rgba(0,242,255,0.05);">balans: 10 VEK</div>
-    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
-</section>
-
-<section id="exchange" class="screen" style="justify-content:center;">
-    <div style="border: 2px solid var(--neon); padding: 30px; border-radius: 20px; text-align:center; background: rgba(0,0,0,0.6); width: 85%; box-shadow: 0 0 30px rgba(0,242,255,0.2);">
-        <h2 style="color:var(--neon); margin-bottom: 20px;">ОБМЕН</h2>
-        <p style="font-size:11px; opacity: 0.8;">ОТДАЕТЕ (TON)</p>
-        <div style="border-bottom: 2px solid var(--neon); margin: 10px 0; font-size: 24px;">1</div>
-        <p style="font-size:11px; opacity: 0.8; margin-top: 15px;">ПОЛУЧАЕТЕ (VEKSEL)</p>
-        <div style="border-bottom: 2px solid var(--neon); margin: 10px 0; font-size: 24px;">100</div>
-        <button class="neon-btn" style="margin-top:30px; width: 100%;">ОБМЕНЯТЬ</button>
-    </div>
+    <div style="margin-top: 35px; border: 1px solid var(--neon); padding: 8px 20px; border-radius: 10px; background: rgba(0,242,255,0.05); font-size: 13px;">balans: 10 VEK</div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
 <section id="withdraw" class="screen" style="justify-content:center;">
-    <div style="border: 2px solid var(--neon); padding: 30px; border-radius: 20px; text-align:center; width: 85%; background: rgba(0,0,0,0.6);">
-        <h2 style="color:var(--neon); margin-bottom: 20px;">ВЫВОД</h2>
-        <p style="font-size:11px; opacity: 0.8;">АДРЕС ВАШЕГО КОШЕЛЬКА</p>
-        <input type="text" placeholder="UQ..." style="width:100%; background:none; border:none; border-bottom:1px solid var(--neon); color:white; margin:20px 0; text-align:center; font-size: 14px;">
-        <button class="neon-btn" style="width: 100%;">ПОДТВЕРДИТЬ ВЫВОД</button>
+    <div style="border: 2px solid var(--neon); padding: 25px; border-radius: 20px; text-align:center; width: 88%; background: rgba(0,0,0,0.6); box-shadow: 0 0 20px rgba(0,242,255,0.2);">
+        <h2 style="color:var(--neon); margin-bottom: 20px; letter-spacing: 3px;">ВЫВОД</h2>
+        
+        <p style="font-size:11px; opacity: 0.7;">СУММА (VEKSEL)</p>
+        <input type="number" placeholder="0.00" class="input-line">
+        
+        <p style="font-size:11px; opacity: 0.7;">АДРЕС ВАШЕГО КОШЕЛЬКА</p>
+        <input type="text" placeholder="UQ..." class="input-line">
+        
+        <button class="neon-btn" style="width: 100%; margin-top: 10px;">ПОДТВЕРДИТЬ ВЫВОД</button>
+    </div>
+    <p style="margin-top: 25px; color: var(--neon); font-size: 14px; letter-spacing: 1px;">ВАШ ТЕКУЩИЙ БАЛАНС: 10.5 TON</p>
+    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
+</section>
+
+<section id="exchange" class="screen" style="justify-content:center;">
+    <div style="border: 2px solid var(--neon); padding: 30px; border-radius: 20px; text-align:center; background: rgba(0,0,0,0.6); width: 85%;">
+        <h2 style="color:var(--neon)">ОБМЕН</h2>
+        <div style="margin: 20px 0; font-size: 20px;">1 TON = 100 VEK</div>
+        <button class="neon-btn" style="width:100%">ОБМЕНЯТЬ</button>
     </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
@@ -122,37 +120,31 @@
 <section id="rules" class="screen">
     <div class="veksel-header">МЕХАНИКА</div>
     <div style="text-align: center; padding: 20px;">
-        <div style="font-size: 60px; margin-bottom: 20px;">👥 ➔ ⭕</div>
-        <p style="line-height: 1.6; font-size: 14px;">Каждый вносит по 10 TON.<br>Тур запускается, когда 11-й игрок заходит в комнату.</p>
-        <div style="font-size: 60px; margin: 30px 0 20px;">💰 ➔ 💎</div>
-        <p style="line-height: 1.6; font-size: 14px;">Взнос 11-го игрока мгновенно распределяется между всеми вами.</p>
+        <div style="font-size: 50px; margin-bottom: 15px;">👥 ➔ ⭕</div>
+        <p style="font-size: 14px;">Тур запускается, когда 11-й игрок заходит в комнату.</p>
     </div>
     <div class="back-btn" onclick="show('profile')">НАЗАД</div>
 </section>
 
 <script>
-    // Звук клика (Web Audio API)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playClick() {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.type = 'sine'; osc.frequency.setValueAtTime(900, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(850, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
     }
 
-    // Переключение экранов без наложений
     function show(id) {
-        const screens = document.querySelectorAll('.screen');
-        screens.forEach(s => s.classList.remove('active')); // Скрываем ВСЁ
-        document.getElementById(id).classList.add('active'); // Показываем НУЖНОЕ
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
     }
 
-    // Математика глобуса
     let pts = [];
-    for(let i=0; i<160; i++) {
-        const t = Math.acos(-1 + (2*i)/160), p = Math.sqrt(160*Math.PI)*t;
+    for(let i=0; i<155; i++) {
+        const t = Math.acos(-1 + (2*i)/155), p = Math.sqrt(155*Math.PI)*t;
         pts.push({x: Math.cos(p)*Math.sin(t), y: Math.sin(p)*Math.sin(t), z: Math.cos(t)});
     }
 
@@ -166,9 +158,9 @@
         pts.forEach(p => {
             const x1 = p.x*Math.cos(angle) - p.z*Math.sin(angle);
             const z1 = p.x*Math.sin(angle) + p.z*Math.cos(angle);
-            const sc = 1 / (2.4 - z1);
-            const gx = x1 * (size*0.48) * sc + size/2;
-            const gy = p.y * (size*0.48) * sc + size/2;
+            const sc = 1 / (2.5 - z1);
+            const gx = x1 * (size*0.47) * sc + size/2;
+            const gy = p.y * (size*0.47) * sc + size/2;
             ctx.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
             ctx.beginPath(); ctx.arc(gx, gy, size/90, 0, 7); ctx.fill();
         });
@@ -176,19 +168,17 @@
 
     function loop() {
         render('globe-load', 200);
-        render('globe-profile', 160);
+        render('globe-profile', 150);
         requestAnimationFrame(loop);
     }
 
-    // Имитация загрузки
     let prg = 0;
     const interval = setInterval(() => {
         prg += 2;
         document.getElementById('load-fill').style.width = prg + '%';
         if(prg >= 100) { clearInterval(interval); show('menu'); }
-    }, 35);
+    }, 30);
 
-    // Рассадка за столом (10 мест)
     const table = document.getElementById('seats');
     for(let i=0; i<10; i++) {
         const a = (i/10)*Math.PI*2;
@@ -196,7 +186,7 @@
         const y = 70 + 58*Math.sin(a) - 16;
         const p = document.createElement('div');
         p.className = 'player'; p.style.left = x+'px'; p.style.top = y+'px';
-        p.innerHTML = i === 5 ? 'Вы' : '👤';
+        p.innerHTML = i === 7 ? 'Вы' : '👤';
         table.appendChild(p);
     }
 
