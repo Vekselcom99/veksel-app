@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VEKSEL RESTORED EDITION</title>
+    <title>VEKSEL GITHUB ULTIMATE</title>
     <style>
         :root { --neon: #00f2ff; --bg: #000814; --pink: #ff007a; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; font-weight: bold; -webkit-tap-highlight-color: transparent; }
@@ -13,20 +13,29 @@
         .active { display: flex !important; z-index: 100; }
 
         .veksel-header { font-size: 2.2rem; letter-spacing: 6px; color: var(--neon); text-shadow: 0 0 15px var(--neon); margin: 20px 0; text-align: center; }
-        .neon-btn { width: 280px; background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); color: white; padding: 14px; border-radius: 12px; margin-bottom: 12px; text-transform: uppercase; text-align: center; cursor: pointer; font-size: 14px; }
         
+        .neon-btn {
+            width: 280px; background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); 
+            color: white; padding: 14px; border-radius: 12px; margin-bottom: 12px; 
+            text-transform: uppercase; text-align: center; cursor: pointer; font-size: 14px;
+        }
+
         .top-nav { width: 100%; display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; z-index: 200; }
         .icon-box { width: 45px; height: 45px; border: 1px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); cursor: pointer; }
 
         .main-frame { border: 2px solid var(--neon); padding: 25px; border-radius: 20px; text-align:center; width: 92%; background: rgba(0,0,0,0.6); box-shadow: 0 0 20px rgba(0,242,255,0.2); }
         .input-line { width: 100%; background: none; border: none; border-bottom: 1px solid rgba(0,242,255,0.5); color: white; margin: 5px 0 15px; text-align: center; font-size: 18px; outline: none; }
-
-        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); cursor: pointer; text-transform: uppercase; font-size: 14px; text-decoration: none; letter-spacing: 1px; }
         
-        #load-fill { width: 0%; height: 100%; background: var(--neon); transition: width 0.1s; }
+        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); cursor: pointer; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; text-decoration: underline; }
+        
+        #load-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: width 0.1s; }
         canvas { filter: drop-shadow(0 0 10px var(--neon)); }
         
-        .player-node { position: absolute; width: 32px; height: 32px; border: 2px solid var(--neon); border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 0 10px var(--neon); }
+        .player-node { position: absolute; width: 32px; height: 32px; border: 2px solid var(--neon); border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all 0.5s ease; box-shadow: 0 0 10px var(--neon); }
+        
+        /* Слайды правил */
+        .slide-frame { text-align: center; padding: 20px; flex: 1; display:flex; flex-direction:column; justify-content:center; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body onclick="playClick()">
@@ -51,7 +60,7 @@
 
 <section id="profile" class="screen">
     <div class="veksel-header">VEKSEL</div>
-    <div style="display:flex; width:100%; align-items:center; justify-content: center;">
+    <div style="display:flex; width:100%; align-items:center; justify-content: center; padding: 0 10px;">
         <canvas class="globe-canvas" width="160" height="160"></canvas>
         <div style="display:flex; flex-direction:column; margin-left: 10px;">
             <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('menu')">ГЛАВНАЯ</button>
@@ -62,7 +71,7 @@
     </div>
     <div style="text-align: center; margin-top: 20px;">
         <p style="font-size: 24px;">🤝 👥</p>
-        <p style="color: #ff4d4d; font-size: 9px; margin-top: 10px;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
+        <p style="color: #ff4d4d; font-size: 9px; margin-top: 10px; letter-spacing: 1px;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
     </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
@@ -93,7 +102,7 @@
         <input type="number" placeholder="0.00" class="input-line">
         <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Адрес вашего кошелька</p>
         <input type="text" placeholder="UQ..." class="input-line">
-        <button class="neon-btn" style="width: 100%; margin-top: 10px; border-color: var(--pink);">Подтвердить</button>
+        <button class="neon-btn" style="width: 100%; margin-top: 10px; border-color: var(--pink);">Подтвердить вывод</button>
     </div>
     <p style="margin-top: 20px; color: var(--neon); font-size: 14px;">ВАШ ТЕКУЩИЙ БАЛАНС: 10.5 TON</p>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
@@ -125,10 +134,11 @@
 
 <section id="rules" class="screen">
     <div class="veksel-header">МЕХАНИКА</div>
-    <div style="text-align: center; padding: 20px; flex: 1; display:flex; flex-direction:column; justify-content:center;">
-        <div style="font-size: 45px; margin-bottom: 20px;">👥 ➔ ⭕</div>
-        <p style="font-size: 15px;">Тур запускается при 11 игроках.</p>
-    </div>
+    
+    <div id="slide-container" class="slide-frame">
+        </div>
+
+    <button class="neon-btn" style="border-color: var(--pink);" onclick="nextSlide()">ДАЛЕЕ ➔</button>
     <div class="back-btn" onclick="show('profile')">НАЗАД</div>
 </section>
 
@@ -146,9 +156,11 @@
     function show(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'table') renderTable(10); // Показываем 10 человек для теста
+        if(id === 'table') renderTable(6); // Показываем 6 человек для теста рассадки
+        if(id === 'rules') { currentSlideIndex = 0; showSlide(0); }
     }
 
+    // ГЛОБУС ВЕЗДЕ
     let pts = [];
     for(let i=0; i<120; i++) {
         const t = Math.acos(-1 + (2*i)/120), p = Math.sqrt(120*Math.PI)*t;
@@ -175,6 +187,7 @@
         requestAnimationFrame(draw);
     }
 
+    // ДИНАМИЧЕСКИЙ СТОЛ
     function renderTable(count) {
         const layer = document.getElementById('dynamic-seats');
         layer.innerHTML = '';
@@ -185,11 +198,35 @@
             const p = document.createElement('div');
             p.className = 'player-node';
             p.style.left = x + 'px'; p.style.top = y + 'px';
-            p.innerHTML = i === 4 ? 'Вы' : '👤'; // "Вы" на 5-й позиции для примера
+            p.innerHTML = i === 0 ? 'Вы' : '👤'; // Игрок всегда "Вы" на 1-й позиции
             layer.appendChild(p);
         }
     }
 
+    // ДАННЫЕ СЛАЙДОВ (Твои эскизы)
+    const slides = [
+        { icon: "👥 ➔ ⭕", title: "МЕХАНИКА 10+1", desc: "Каждый пользователь вносит по 10 TON. Тур запускается, когда 11-й игрок заходит в комнату." },
+        { icon: "💰 ➔ 💎", title: "РАСПРЕДЕЛЕНИЕ", desc: "Общий банк 100 TON делится между участниками согласно алгоритму." },
+        { icon: "📈 ➔ ✅", title: "РЕЗУЛЬТАТ", desc: "Получайте выплату прямо на свой TON-кошелек в автоматическом режиме." }
+    ];
+    let currentSlideIndex = 0;
+
+    function showSlide(index) {
+        const container = document.getElementById('slide-container');
+        const s = slides[index];
+        container.innerHTML = `
+            <div style="font-size: 50px; margin-bottom: 20px;">${s.icon}</div>
+            <h2 style="color: var(--neon); margin-bottom: 10px;">${s.title}</h2>
+            <p style="font-size: 14px; line-height: 1.5; opacity: 0.9;">${s.desc}</p>
+        `;
+    }
+
+    function nextSlide() {
+        currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+        showSlide(currentSlideIndex);
+    }
+
+    // ЗАГРУЗКА
     let prg = 0;
     const loader = setInterval(() => {
         prg += 2;
