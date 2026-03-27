@@ -5,186 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VEKSEL OFFICIAL</title>
     <style>
-        :root {
-            --neon: #00f2ff;
-            --bg: radial-gradient(circle at center, #003d5c 0%, #000814 100%);
-        }
-
-        * { 
-            box-sizing: border-box; margin: 0; padding: 0; 
-            font-family: 'Arial', sans-serif; font-weight: bold; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-
+        :root { --neon: #00f2ff; --bg: radial-gradient(circle at center, #003d5c 0%, #000814 100%); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; font-weight: bold; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: white; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* --- АНИМАЦИЯ ДЫШАЩЕГО НЕОНА --- */
-        @keyframes breathe {
-            0%, 100% { opacity: 0.7; box-shadow: 0 0 5px var(--neon); border-color: rgba(0,242,255,0.4); }
-            50% { opacity: 1; box-shadow: 0 0 20px var(--neon); border-color: var(--neon); }
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .screen { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; padding: 20px; }
+        @keyframes breathe { 0%, 100% { opacity: 0.7; box-shadow: 0 0 5px var(--neon); } 50% { opacity: 1; box-shadow: 0 0 20px var(--neon); } }
+        
+        .screen { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; padding: 20px; z-index: 5; }
         .active { display: flex; }
+        .scrollable { overflow-y: auto; display: block; }
+
+        /* ЭТАЛОННЫЙ ЛОГОТИП */
+        .veksel-header { font-size: 2.2rem; letter-spacing: 6px; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-align: center; margin: 20px 0; }
 
         .neon-btn {
             width: 100%; max-width: 280px; background: rgba(0, 242, 255, 0.1);
             border: 2px solid var(--neon); color: white; padding: 16px; border-radius: 12px;
-            margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;
-            animation: breathe 4s infinite ease-in-out; text-align: center; backdrop-filter: blur(5px);
+            margin-bottom: 15px; text-transform: uppercase; animation: breathe 4s infinite ease-in-out; text-align: center;
         }
 
-        /* --- ГЛАВНЫЙ ЭКРАН --- */
-        .top-icons { width: 100%; display: flex; justify-content: space-between; padding: 10px; margin-bottom: 20px; }
-        .icon-circle { width: 45px; height: 45px; border: 1px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); }
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        .top-icons { width: 100%; display: flex; justify-content: space-between; position: absolute; top: 15px; left: 0; padding: 0 15px; z-index: 20; }
+        .icon-circle { width: 45px; height: 45px; border: 1px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); font-size: 20px; }
 
-        /* --- СТОЛ (ПО РИСУНКУ 5 и 15) --- */
-        .table-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; width: 100%; }
+        /* СЛАЙДЫ (ПО ЭСКИЗАМ) */
+        .slide-page { min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; border-bottom: 1px solid rgba(0,242,255,0.2); text-align: center; }
+        .sketch-gfx { font-size: 60px; margin: 20px 0; text-shadow: 0 0 20px var(--neon); }
+
+        /* СТОЛ */
         .poker-table {
             width: 280px; height: 140px; border: 4px solid var(--neon); border-radius: 100px;
             background: radial-gradient(ellipse, #005a8d 0%, #000d1a 100%);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: inset 0 0 30px var(--neon); position: relative;
+            box-shadow: inset 0 0 30px var(--neon); position: relative; margin-top: 100px;
         }
-        .seat { position: absolute; width: 35px; height: 35px; border: 2px solid var(--neon); border-radius: 50%; background: #001a2e; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-        .seat.me { border-color: gold; box-shadow: 0 0 10px gold; color: gold; }
-        .waiting-zone { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); text-align: center; }
+        .seat { position: absolute; width: 34px; height: 34px; border: 2px solid var(--neon); border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+        .waiting-zone { position: absolute; top: 70px; text-align: center; width: 100%; }
 
-        /* --- ПРОФИЛЬ (ПО РИСУНКУ 6 и 14) --- */
-        .profile-header { width: 100%; text-align: center; margin-top: 10px; letter-spacing: 5px; font-size: 1.8rem; }
-        .profile-body { display: flex; width: 100%; flex: 1; align-items: center; }
-        .profile-left { flex: 1.2; display: flex; flex-direction: column; align-items: flex-start; padding-left: 20px; position: relative; top: -20px; } /* Глобус выше и левее */
-        .profile-right { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0; animation: fadeIn 1.5s forwards; }
-        .prof-btn { padding: 8px; font-size: 12px; margin-bottom: 6px; border-radius: 8px; }
+        /* ПРОФИЛЬ (ГЛОБУС СЛЕВА) */
+        .profile-container { display: flex; width: 100%; align-items: center; margin-top: 40px; }
+        .globe-box { flex: 1; display: flex; justify-content: center; }
+        #globe-canvas { width: 160px; height: 160px; } /* Квадрат для ровного круга */
+        .profile-menu { flex: 1; display: flex; flex-direction: column; align-items: center; }
 
-        /* --- ОКНА ОБМЕНА / ВЫВОДА (ПО РИСУНКУ 11 и 12) --- */
-        .modal-box { 
-            width: 100%; max-width: 320px; border: 2px solid var(--neon); border-radius: 20px; 
-            padding: 30px; background: rgba(0, 10, 20, 0.9); text-align: center; 
-        }
-        .input-line { 
-            width: 100%; background: none; border: none; border-bottom: 2px solid var(--neon); 
-            color: white; padding: 10px; margin: 15px 0; text-align: center; font-size: 1.1rem;
-        }
+        /* ОБМЕН / ВЫВОД */
+        .modal-box { width: 100%; max-width: 320px; border: 2px solid var(--neon); border-radius: 20px; padding: 25px; background: rgba(0, 10, 20, 0.9); margin-top: 60px; }
+        .input-line { width: 100%; background: none; border: none; border-bottom: 2px solid var(--neon); color: white; padding: 10px; margin: 10px 0; text-align: center; font-size: 1.1rem; }
+        .balance-footer { margin-top: 20px; font-size: 14px; color: var(--neon); }
 
-        .back-link { margin-top: auto; padding: 25px; color: var(--neon); text-decoration: underline; cursor: pointer; }
+        .back-link { margin-top: auto; padding: 25px; color: var(--neon); text-decoration: underline; }
 
-        #globe-canvas { width: 160px; height: 160px; }
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.4; }
     </style>
 </head>
 <body>
 
-<canvas id="bg-canvas" style="position:fixed; z-index:-1;"></canvas>
+<canvas id="bg-canvas"></canvas>
 
-<section id="screen-menu" class="screen active">
+<section id="screen-splash" class="screen active" style="justify-content: center;">
+    <div id="splash-globe-container" style="width:200px; height:200px; margin-bottom: 20px;"></div>
+    <div class="veksel-header">VEKSEL</div>
+    <div style="width: 200px; height: 4px; background: #111; border-radius: 2px; overflow: hidden;">
+        <div id="load-bar" style="width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon);"></div>
+    </div>
+</section>
+
+<section id="screen-slides" class="screen scrollable">
+    <div class="slide-page">
+        <div class="veksel-header">МЕХАНИКА 10+1</div>
+        <div class="sketch-gfx">👥 ➔ ⭕</div>
+        <p>Каждый пользователь вносит по 10 TON.<br>Тур запускается, когда 11-й игрок заходит в комнату.</p>
+    </div>
+    <div class="slide-page">
+        <div class="veksel-header">РАСПРЕДЕЛЕНИЕ</div>
+        <div class="sketch-gfx">💰 ➔ 💎</div>
+        <p>Взнос 11-го игрока мгновенно распределяется между всеми вами.<br>Процесс обмена не начнется, пока один не встанет в очередь.</p>
+        <button class="neon-btn" style="margin-top: 40px;" onclick="nav('screen-menu')">ВХОД</button>
+    </div>
+</section>
+
+<section id="screen-menu" class="screen">
     <div class="top-icons">
         <div class="icon-circle" onclick="nav('screen-exchange')">👛</div>
         <div class="icon-circle" onclick="nav('screen-profile')">👤</div>
     </div>
-    <h1 style="letter-spacing: 8px; margin-top: 40px; text-shadow: 0 0 15px var(--neon);">VEKSEL</h1>
+    <div class="veksel-header" style="margin-top: 80px;">VEKSEL</div>
     <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; align-items: center;">
-        <button class="neon-btn" onclick="nav('screen-table')">🔴 СТОЛ</button>
-        <button class="neon-btn" onclick="nav('screen-exchange')">🔄 ОБМЕН</button>
-        <button class="neon-btn" onclick="nav('screen-withdraw')">⬆️ ВЫВОД</button>
-        <button class="neon-btn" onclick="nav('screen-exchange')">💵 ПОПОЛНИТЬ</button>
+        <button class="neon-btn" onclick="nav('screen-table')">СТОЛ</button>
+        <button class="neon-btn" onclick="nav('screen-exchange')">ОБМЕН</button>
+        <button class="neon-btn" onclick="nav('screen-withdraw')">ВЫВОД</button>
+        <button class="neon-btn" onclick="nav('screen-exchange')">ПОПОЛНИТЬ</button>
     </div>
 </section>
 
 <section id="screen-table" class="screen">
     <div class="top-icons">
-        <div></div>
+        <div class="icon-circle" onclick="nav('screen-exchange')">👛</div>
         <div class="icon-circle" onclick="nav('screen-profile')">👤</div>
     </div>
-    <div class="table-container">
-        <p style="color: var(--neon); letter-spacing: 3px; margin-bottom: 30px;">СТОЛ В ИГРЕ</p>
-        <div class="poker-table">
-            <div style="font-size: 10px; color: var(--neon);">БАНК ТУРА</div>
-            <div style="font-size: 20px;">100 VEKSEL</div>
-            <div id="seats-placeholder"></div>
-        </div>
-        <div class="waiting-zone">
-            <div class="seat" style="position:static; margin: 0 auto 5px;">👤</div>
-            <p style="font-size: 10px;">ЖДЕМ...</p>
-            <div style="width: 50px; height: 4px; background: #333; margin-top: 5px;"><div style="width: 60%; height: 100%; background: var(--neon);"></div></div>
-        </div>
-        <div style="margin-top: 40px; border: 1px solid var(--neon); padding: 10px 30px; border-radius: 10px;">balans: 10 VEK</div>
+    <div class="waiting-zone">
+        <div class="seat" style="position: static; margin: 0 auto 5px;">👤</div>
+        <p style="font-size: 10px; letter-spacing: 2px;">ЖДЕМ...</p>
+        <div style="width: 60px; height: 4px; background: #333; margin: 5px auto;"><div style="width: 70%; height: 100%; background: var(--neon);"></div></div>
     </div>
+    <div class="poker-table">
+        <div style="font-size: 10px; color: var(--neon);">БАНК ТУРА</div>
+        <div style="font-size: 1.2rem;">100 VEKSEL</div>
+        <div id="table-seats"></div>
+    </div>
+    <div style="margin-top: 30px; border: 1px solid var(--neon); padding: 8px 20px; border-radius: 8px;">balans: 10 VEK</div>
     <div class="back-link" onclick="nav('screen-menu')">НАЗАД</div>
 </section>
 
 <section id="screen-profile" class="screen">
-    <div class="profile-header">VEKSEL</div>
-    <div class="profile-body">
-        <div class="profile-left">
+    <div class="veksel-header">VEKSEL</div>
+    <div class="profile-container">
+        <div class="globe-box">
             <canvas id="globe-canvas"></canvas>
         </div>
-        <div class="profile-right">
-            <button class="neon-btn prof-btn" onclick="nav('screen-menu')">ГЛАВНАЯ</button>
-            <button class="neon-btn prof-btn">БАЛАНС</button>
-            <button class="neon-btn prof-btn" onclick="nav('screen-exchange')">ОБМЕН</button>
-            <button class="neon-btn prof-btn" onclick="nav('screen-withdraw')">ВЫВОД</button>
-            <button class="neon-btn prof-btn">ПОПОЛНЕНИЯ</button>
-            <button class="neon-btn prof-btn" onclick="nav('screen-slides')">ПРАВИЛА</button>
-            <div style="font-size: 24px; margin-top: 10px;">🤝 👥</div>
-            <div style="color: #ff4d4d; font-size: 8px; margin-top: 10px; text-align: center;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</div>
+        <div class="profile-menu">
+            <button class="neon-btn" style="padding: 8px; font-size: 12px;" onclick="nav('screen-menu')">ГЛАВНАЯ</button>
+            <button class="neon-btn" style="padding: 8px; font-size: 12px;">БАЛАНС</button>
+            <button class="neon-btn" style="padding: 8px; font-size: 12px;" onclick="nav('screen-exchange')">ОБМЕН</button>
+            <button class="neon-btn" style="padding: 8px; font-size: 12px;" onclick="nav('screen-withdraw')">ВЫВОД</button>
+            <div style="font-size: 24px; margin: 10px 0;">🤝 👥</div>
+            <p style="color: #ff4d4d; font-size: 8px; text-align: center;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
         </div>
     </div>
     <div class="back-link" onclick="nav('screen-menu')">НАЗАД</div>
 </section>
 
-<section id="screen-exchange" class="screen" style="justify-content: center;">
+<section id="screen-exchange" class="screen">
+    <div class="veksel-header">VEKSEL</div>
     <div class="modal-box">
-        <h2 style="color: var(--neon); margin-bottom: 10px;">ОБМЕН</h2>
-        <p style="font-size: 12px; opacity: 0.6;">ОТДАЕТЕ (TON)</p>
+        <h2 style="color: var(--neon); margin-bottom: 15px;">ОБМЕН</h2>
+        <p style="font-size: 12px;">ОТДАЕТЕ (TON)</p>
         <input type="number" class="input-line" value="1">
-        <p style="font-size: 12px; opacity: 0.6;">ПОЛУЧАЕТЕ (VEKSEL)</p>
-        <input type="number" class="input-line" value="100" readonly>
+        <p style="font-size: 12px;">ПОЛУЧАЕТЕ (VEKSEL)</p>
+        <input type="number" class="input-line" value="10" readonly>
         <button class="neon-btn" style="margin-top: 10px;">ОБМЕНЯТЬ</button>
     </div>
+    <div class="balance-footer">ВАШ БАЛАНС: 10.5 TON</div>
     <div class="back-link" onclick="nav('screen-menu')">НАЗАД</div>
 </section>
 
-<section id="screen-withdraw" class="screen" style="justify-content: center;">
+<section id="screen-withdraw" class="screen">
+    <div class="veksel-header">VEKSEL</div>
     <div class="modal-box">
-        <h2 style="color: var(--neon); margin-bottom: 20px;">ВЫВОД</h2>
-        <p style="font-size: 12px; text-align: left; margin-left: 10px;">АДРЕС TON</p>
-        <input type="text" class="input-line" placeholder="UQ...Xyz">
-        <button class="neon-btn" style="margin-top: 20px;">ВЫВЕСТИ</button>
+        <h2 style="color: var(--neon); margin-bottom: 15px;">ВЫВОД</h2>
+        <p style="font-size: 12px;">СУММА (VEKSEL)</p>
+        <input type="number" class="input-line" placeholder="0.00">
+        <p style="font-size: 12px;">АДРЕС TON</p>
+        <input type="text" class="input-line" placeholder="UQ...">
+        <button class="neon-btn" style="margin-top: 10px;">ВЫВЕСТИ</button>
     </div>
+    <div class="balance-footer">ВАШ БАЛАНС: 10.5 TON</div>
     <div class="back-link" onclick="nav('screen-menu')">НАЗАД</div>
-</section>
-
-<section id="screen-slides" class="screen" style="justify-content: center;">
-    <div class="modal-box">
-        <div id="slide-gfx" style="height: 120px; display: flex; align-items: center; justify-content: center; font-size: 50px;"></div>
-        <h2 id="slide-h" style="color: var(--neon); margin: 15px 0;"></h2>
-        <p id="slide-p" style="font-size: 14px; line-height: 1.4;"></p>
-        <button class="neon-btn" style="margin-top: 20px;" onclick="nextSlide()">ДАЛЕЕ</button>
-    </div>
 </section>
 
 <script>
-    const ctx_bg = document.getElementById('bg-canvas').getContext('2d');
-    const ctx_glb = document.getElementById('globe-canvas').getContext('2d');
+    const bg_ctx = document.getElementById('bg-canvas').getContext('2d');
+    const glb_ctx = document.getElementById('globe-canvas').getContext('2d');
     let pts = [];
-
-    // Звук
-    const audio = new (window.AudioContext || window.webkitAudioContext)();
-    function beep() {
-        const o = audio.createOscillator(), g = audio.createGain();
-        o.connect(g); g.connect(audio.destination);
-        o.frequency.value = 800; g.gain.value = 0.05;
-        g.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.1);
-        o.start(); o.stop(audio.currentTime + 0.1);
-    }
-
-    function nav(id) { 
-        beep();
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
 
     function init() {
         document.getElementById('bg-canvas').width = window.innerWidth;
@@ -196,52 +178,57 @@
         }
     }
 
-    let r = 0;
+    let rot = 0;
     function loop() {
-        r += 0.01;
-        // Фон
-        ctx_bg.clearRect(0,0,window.innerWidth, window.innerHeight);
-        // Глобус в профиле
-        ctx_glb.clearRect(0,0,160,160);
+        rot += 0.01;
+        bg_ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+        glb_ctx.clearRect(0,0,160,160);
+        
         pts.forEach(p => {
-            const x1 = p.x*Math.cos(r) - p.z*Math.sin(r);
-            const z1 = p.x*Math.sin(r) + p.z*Math.cos(r);
-            const sc = 1 / (2.5 - z1);
-            const px = x1 * 70 * sc + 80, py = p.y * 70 * sc + 80;
-            ctx_glb.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
-            ctx_glb.beginPath(); ctx_glb.arc(px, py, 1.5, 0, 7); ctx_glb.fill();
+            const x1 = p.x*Math.cos(rot) - p.z*Math.sin(rot);
+            const z1 = p.x*Math.sin(rot) + p.z*Math.cos(rot);
+            // Отрисовка ровного глобуса в профиле
+            const scG = 1 / (2.2 - z1);
+            const gx = x1 * 75 * scG + 80, gy = p.y * 75 * scG + 80;
+            glb_ctx.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
+            glb_ctx.beginPath(); glb_ctx.arc(gx, gy, 1.8, 0, 7); glb_ctx.fill();
+            
+            // Фон
+            const scB = 1 / (3 - z1);
+            const bx = x1 * window.innerWidth * 0.4 * scB + window.innerWidth/2;
+            const by = p.y * window.innerWidth * 0.4 * scB + window.innerHeight/2;
+            bg_ctx.fillStyle = `rgba(0, 242, 255, 0.15)`;
+            bg_ctx.fillRect(bx, by, 2, 2);
         });
         requestAnimationFrame(loop);
     }
 
-    // Рассадка за столом
-    const ph = document.getElementById('seats-placeholder');
-    for(let i=0; i<10; i++){
-        const a = (i/10)*6.28;
-        const x = 140 + 125*Math.cos(a) - 17, y = 70 + 65*Math.sin(a) - 17;
+    function nav(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (id === 'screen-slides') document.getElementById(id).scrollTop = 0;
+    }
+
+    // Загрузка
+    let prg = 0;
+    const interval = setInterval(() => {
+        prg += 2;
+        document.getElementById('load-bar').style.width = prg + '%';
+        if(prg >= 100) { clearInterval(interval); nav('screen-slides'); }
+    }, 30);
+
+    // Рассадка
+    const table = document.getElementById('table-seats');
+    for(let i=0; i<10; i++) {
+        const a = (i/10)*Math.PI*2;
+        const x = 140 + 120*Math.cos(a) - 17, y = 70 + 60*Math.sin(a) - 17;
         const s = document.createElement('div');
-        s.className = 'seat' + (i===0?' me':'');
-        s.style.left = x+'px'; s.style.top = y+'px';
-        s.innerHTML = i===0?'ВЫ':'👤';
-        ph.appendChild(s);
+        s.className = 'seat'; s.style.left = x+'px'; s.style.top = y+'px';
+        s.innerHTML = i===0 ? 'ВЫ' : '👤';
+        table.appendChild(s);
     }
 
-    // Слайды
-    const sData = [
-        {g:"👥➔⭕", h:"МЕХАНИКА 10+1", p:"За столом сидят 10 участников. Тур запускается, когда 11-й игрок заходит в комнату."},
-        {g:"💰➔💎", h:"РАСПРЕДЕЛЕНИЕ", p:"Взнос 11-го игрока мгновенно распределяется между всеми вами."}
-    ];
-    let sIdx = 0;
-    function nextSlide() {
-        if(++sIdx < sData.length) updateSlide(); else nav('screen-menu');
-    }
-    function updateSlide() {
-        document.getElementById('slide-gfx').innerHTML = sData[sIdx].g;
-        document.getElementById('slide-h').innerHTML = sData[sIdx].h;
-        document.getElementById('slide-p').innerHTML = sData[sIdx].p;
-    }
-
-    window.onload = () => { init(); loop(); updateSlide(); };
+    window.onload = () => { init(); loop(); };
 </script>
 </body>
 </html>
