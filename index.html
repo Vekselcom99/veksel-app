@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VEKSEL GITHUB ULTIMATE</title>
+    <title>VEKSEL - PRO EDITION</title>
     <style>
         :root { --neon: #00f2ff; --bg: #000814; --pink: #ff007a; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; font-weight: bold; -webkit-tap-highlight-color: transparent; }
@@ -13,29 +13,17 @@
         .active { display: flex !important; z-index: 100; }
 
         .veksel-header { font-size: 2.2rem; letter-spacing: 6px; color: var(--neon); text-shadow: 0 0 15px var(--neon); margin: 20px 0; text-align: center; }
-        
-        .neon-btn {
-            width: 280px; background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); 
-            color: white; padding: 14px; border-radius: 12px; margin-bottom: 12px; 
-            text-transform: uppercase; text-align: center; cursor: pointer; font-size: 14px;
-        }
+        .neon-btn { width: 280px; background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); color: white; padding: 14px; border-radius: 12px; margin-bottom: 12px; text-transform: uppercase; text-align: center; cursor: pointer; font-size: 14px; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
 
-        .top-nav { width: 100%; display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; z-index: 200; }
-        .icon-box { width: 45px; height: 45px; border: 1px solid var(--neon); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); cursor: pointer; }
+        /* Стили презентации */
+        .slide-box { width: 90%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .sketch-ui { position: relative; width: 280px; height: 180px; margin-bottom: 20px; border: 1px dashed rgba(0, 242, 255, 0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; }
+        .avatar { width: 30px; height: 30px; border: 2px solid var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; background: #000; position: absolute; }
 
-        .main-frame { border: 2px solid var(--neon); padding: 25px; border-radius: 20px; text-align:center; width: 92%; background: rgba(0,0,0,0.6); box-shadow: 0 0 20px rgba(0,242,255,0.2); }
-        .input-line { width: 100%; background: none; border: none; border-bottom: 1px solid rgba(0,242,255,0.5); color: white; margin: 5px 0 15px; text-align: center; font-size: 18px; outline: none; }
-        
-        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); cursor: pointer; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; text-decoration: underline; }
-        
-        #load-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: width 0.1s; }
+        .back-btn { margin-top: auto; padding-bottom: 30px; color: var(--neon); cursor: pointer; text-transform: uppercase; font-size: 14px; text-decoration: underline; }
         canvas { filter: drop-shadow(0 0 10px var(--neon)); }
-        
-        .player-node { position: absolute; width: 32px; height: 32px; border: 2px solid var(--neon); border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all 0.5s ease; box-shadow: 0 0 10px var(--neon); }
-        
-        /* Слайды правил */
-        .slide-frame { text-align: center; padding: 20px; flex: 1; display:flex; flex-direction:column; justify-content:center; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body onclick="playClick()">
@@ -43,151 +31,113 @@
 <section id="splash" class="screen active" style="justify-content: center;">
     <canvas class="globe-canvas" width="220" height="220"></canvas>
     <div class="veksel-header">VEKSEL</div>
-    <div style="width: 200px; height: 4px; background: #111; border-radius: 2px; overflow: hidden;"><div id="load-fill"></div></div>
+    <div style="width: 200px; height: 4px; background: #111; border-radius: 2px; overflow: hidden;"><div id="load-fill" style="width:0%; height:100%; background:var(--neon); transition:0.1s;"></div></div>
+</section>
+
+<section id="intro" class="screen">
+    <div class="veksel-header" style="font-size: 1.5rem;">ОБУЧЕНИЕ</div>
+    <div id="slide-content" class="slide-box">
+        </div>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button id="prev-btn" class="neon-btn" style="width: 135px; border-color: gray; color: gray;" onclick="changeSlide(-1)">НАЗАД</button>
+        <button id="next-btn" class="neon-btn" style="width: 135px;" onclick="changeSlide(1)">ДАЛЕЕ</button>
+    </div>
 </section>
 
 <section id="menu" class="screen">
-    <div class="top-nav">
-        <div class="icon-box" onclick="show('exchange')">👛</div>
-        <div class="icon-box" onclick="show('profile')">👤</div>
-    </div>
     <div class="veksel-header" style="margin-top: 80px;">VEKSEL</div>
     <button class="neon-btn" onclick="show('table')">СТОЛ</button>
     <button class="neon-btn" onclick="show('exchange')">ОБМЕН</button>
     <button class="neon-btn" onclick="show('withdraw')">ВЫВОД</button>
-    <button class="neon-btn" onclick="show('exchange')">ПОПОЛНИТЬ</button>
-</section>
-
-<section id="profile" class="screen">
-    <div class="veksel-header">VEKSEL</div>
-    <div style="display:flex; width:100%; align-items:center; justify-content: center; padding: 0 10px;">
-        <canvas class="globe-canvas" width="160" height="160"></canvas>
-        <div style="display:flex; flex-direction:column; margin-left: 10px;">
-            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('menu')">ГЛАВНАЯ</button>
-            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('withdraw')">ВЫВОД</button>
-            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('exchange')">ОБМЕН</button>
-            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('rules')">ПРАВИЛА</button>
-        </div>
-    </div>
-    <div style="text-align: center; margin-top: 20px;">
-        <p style="font-size: 24px;">🤝 👥</p>
-        <p style="color: #ff4d4d; font-size: 9px; margin-top: 10px; letter-spacing: 1px;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
-    </div>
-    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
+    <div class="back-btn" onclick="show('intro')">ИНСТРУКЦИЯ</div>
 </section>
 
 <section id="table" class="screen">
-    <div class="top-nav">
-        <div class="icon-box" style="border-color: var(--pink);" onclick="show('exchange')">👛</div>
-        <canvas class="globe-canvas" width="60" height="60"></canvas> 
-        <div class="icon-box" onclick="show('profile')">👤</div>
-    </div>
-    <div style="margin-top: 80px; text-align: center;">
-        <div style="width:32px; height:32px; border:2px solid var(--neon); border-radius:50%; margin: 0 auto 5px; display:flex; align-items:center; justify-content:center;">👤</div>
-        <p style="font-size: 10px; color: var(--neon);">ЖДЕМ...</p>
-    </div>
-    <div style="position: relative; width: 300px; height: 160px; border: 4px solid var(--neon); border-radius: 100px; margin-top: 30px; box-shadow: inset 0 0 20px var(--neon);">
-        <div style="position:absolute; width:100%; text-align:center; top:42%; font-size:14px;">100 VEKSEL</div>
+    <div class="veksel-header">СТОЛ</div>
+    <div style="position: relative; width: 300px; height: 160px; border: 4px solid var(--neon); border-radius: 100px; margin-top: 50px; box-shadow: inset 0 0 20px var(--neon);">
         <div id="dynamic-seats"></div>
     </div>
-    <div style="margin-top: 35px; border: 1px solid var(--neon); padding: 8px 20px; border-radius: 10px; background: rgba(0,242,255,0.05); font-size: 13px;">balans: 10 VEK</div>
-    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
-</section>
-
-<section id="withdraw" class="screen">
-    <canvas class="globe-canvas" width="150" height="150" style="margin-top:20px;"></canvas>
-    <div class="main-frame">
-        <h2 style="color:var(--neon); margin-bottom: 20px; letter-spacing: 2px;">ВЫВОД</h2>
-        <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Сумма (TON)</p>
-        <input type="number" placeholder="0.00" class="input-line">
-        <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Адрес вашего кошелька</p>
-        <input type="text" placeholder="UQ..." class="input-line">
-        <button class="neon-btn" style="width: 100%; margin-top: 10px; border-color: var(--pink);">Подтвердить вывод</button>
-    </div>
-    <p style="margin-top: 20px; color: var(--neon); font-size: 14px;">ВАШ ТЕКУЩИЙ БАЛАНС: 10.5 TON</p>
-    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
+    <div class="back-btn" onclick="show('menu')">В МЕНЮ</div>
 </section>
 
 <section id="exchange" class="screen">
-    <canvas class="globe-canvas" width="150" height="150" style="margin-top:20px;"></canvas>
-    <div class="main-frame">
-        <h2 style="color:var(--neon); margin-bottom: 20px; letter-spacing: 2px;">ОБМЕН</h2>
-        <div style="display:flex; justify-content: space-between; align-items:center;">
-            <div style="text-align:left; flex:1;">
-                <p style="font-size:9px; opacity:0.7;">ОТДАЕТЕ (TON)</p>
-                <input type="number" value="1.00" class="input-line" style="text-align:left; font-size:22px;">
-            </div>
-            <div style="font-size:20px; color:var(--pink); margin-left:10px;">👛</div>
-        </div>
-        <div style="height:1px; background:rgba(0,242,255,0.3); margin: 5px 0 15px;"></div>
-        <div style="display:flex; justify-content: space-between; align-items:center;">
-            <div style="text-align:left; flex:1;">
-                <p style="font-size:9px; opacity:0.7;">ПОЛУЧАЕТЕ (VEKSEL)</p>
-                <input type="number" value="100.00" class="input-line" style="text-align:left; font-size:22px;">
-            </div>
-            <div style="font-size:20px; color:var(--neon); margin-left:10px;">👤</div>
-        </div>
-        <button class="neon-btn" style="width:100%; border-color: var(--pink); margin-top:10px;">ОБМЕНЯТЬ</button>
+    <canvas class="globe-canvas" width="120" height="120" style="margin-top:20px;"></canvas>
+    <div class="veksel-header" style="font-size: 1.5rem;">ОБМЕН</div>
+    <div style="width: 90%; border: 1px solid var(--neon); padding: 20px; border-radius: 15px;">
+        <p style="font-size: 12px; opacity: 0.6;">ОТДАЕТЕ (TON)</p>
+        <input type="number" value="1.0" style="width: 100%; background: none; border: none; border-bottom: 1px solid var(--neon); color: white; margin-bottom: 20px; font-size: 20px;">
+        <p style="font-size: 12px; opacity: 0.6;">ПОЛУЧАЕТЕ (VEK)</p>
+        <input type="number" value="100" style="width: 100%; background: none; border: none; border-bottom: 1px solid var(--neon); color: white; font-size: 20px;">
     </div>
-    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
+    <button class="neon-btn" style="margin-top: 20px; border-color: var(--pink);">ОБМЕНЯТЬ</button>
+    <div class="back-btn" onclick="show('menu')">В МЕНЮ</div>
 </section>
 
-<section id="rules" class="screen">
-    <div class="veksel-header">МЕХАНИКА</div>
-    
-    <div id="slide-container" class="slide-frame">
-        </div>
-
-    <button class="neon-btn" style="border-color: var(--pink);" onclick="nextSlide()">ДАЛЕЕ ➔</button>
-    <div class="back-btn" onclick="show('profile')">НАЗАД</div>
+<section id="withdraw" class="screen">
+    <div class="veksel-header">ВЫВОД</div>
+    <div style="width: 90%; border: 1px solid var(--neon); padding: 20px; border-radius: 15px; text-align: center;">
+        <p style="font-size: 12px; margin-bottom: 10px;">СУММА (TON)</p>
+        <input type="number" placeholder="0.00" style="width: 100%; background: none; border: none; border-bottom: 1px solid var(--neon); color: white; margin-bottom: 20px; text-align: center;">
+        <p style="font-size: 12px; margin-bottom: 10px;">АДРЕС КОШЕЛЬКА</p>
+        <input type="text" placeholder="UQ..." style="width: 100%; background: none; border: none; border-bottom: 1px solid var(--neon); color: white; text-align: center;">
+    </div>
+    <p style="margin-top: 20px; font-size: 14px; color: var(--neon);">БАЛАНС: 10.5 TON</p>
+    <div class="back-btn" onclick="show('menu')">В МЕНЮ</div>
 </section>
 
 <script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playClick() {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    let currentSlide = 0;
+    const slides = [
+        {
+            title: "ШАГ 1: ВНОС",
+            desc: "Каждый вносит по 10 TON в общий банк тура.",
+            draw: () => `<div class="sketch-ui"><div style="font-size: 50px;">💰 ➔ 🏦</div></div>`
+        },
+        {
+            title: "ШАГ 2: СТОЛ 10+1",
+            desc: "10 человек за столом. Тур стартует, когда 11-й игрок встает в очередь.",
+            draw: () => {
+                let html = '<div class="sketch-ui"><div style="width:180px; height:80px; border:2px solid var(--neon); border-radius:50px;"></div>';
+                for(let i=0; i<10; i++){
+                    let a = (i/10)*Math.PI*2;
+                    html += `<div class="avatar" style="left:${Math.cos(a)*100+125}px; top:${Math.sin(a)*50+75}px;">10</div>`;
+                }
+                html += `<div class="avatar" style="bottom:10px; left:125px; border-color:var(--pink);">11</div><div style="position:absolute; bottom:45px; font-size:20px;">↑</div></div>`;
+                return html;
+            }
+        },
+        {
+            title: "ШАГ 3: ВЫПЛАТА",
+            desc: "11-й игрок получает долю из фонда комиссий VEKSEL.",
+            draw: () => `<div class="sketch-ui"><div style="font-size: 40px;">👥✅ ➔ 💎</div><div style="position:absolute; bottom:20px; color:var(--pink); font-size:11px;">COMMISSION FUND</div></div>`
+        }
+    ];
+
+    function showSlide(idx) {
+        const content = document.getElementById('slide-content');
+        content.innerHTML = `
+            ${slides[idx].draw()}
+            <h2 style="color:var(--neon); margin-bottom:10px;">${slides[idx].title}</h2>
+            <p style="font-size:14px; padding:0 20px; line-height:1.4;">${slides[idx].desc}</p>
+        `;
+        document.getElementById('prev-btn').style.opacity = idx === 0 ? "0.3" : "1";
+        document.getElementById('next-btn').innerText = idx === slides.length - 1 ? "В МЕНЮ" : "ДАЛЕЕ";
+    }
+
+    function changeSlide(dir) {
+        currentSlide += dir;
+        if (currentSlide < 0) currentSlide = 0;
+        if (currentSlide >= slides.length) { show('menu'); return; }
+        showSlide(currentSlide);
     }
 
     function show(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'table') renderTable(6); // Показываем 6 человек для теста рассадки
-        if(id === 'rules') { currentSlideIndex = 0; showSlide(0); }
+        if(id === 'table') renderTable(10);
+        if(id === 'intro') { currentSlide = 0; showSlide(0); }
     }
 
-    // ГЛОБУС ВЕЗДЕ
-    let pts = [];
-    for(let i=0; i<120; i++) {
-        const t = Math.acos(-1 + (2*i)/120), p = Math.sqrt(120*Math.PI)*t;
-        pts.push({x: Math.cos(p)*Math.sin(t), y: Math.sin(p)*Math.sin(t), z: Math.cos(t)});
-    }
-
-    let angle = 0;
-    function draw() {
-        angle += 0.015;
-        document.querySelectorAll('.globe-canvas').forEach(cvs => {
-            const ctx = cvs.getContext('2d');
-            const size = cvs.width;
-            ctx.clearRect(0,0,size,size);
-            pts.forEach(p => {
-                const x1 = p.x*Math.cos(angle) - p.z*Math.sin(angle);
-                const z1 = p.x*Math.sin(angle) + p.z*Math.cos(angle);
-                const sc = 1 / (2.2 - z1);
-                const gx = x1 * (size*0.48) * sc + size/2;
-                const gy = p.y * (size*0.48) * sc + size/2;
-                ctx.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
-                ctx.beginPath(); ctx.arc(gx, gy, size/100, 0, 7); ctx.fill();
-            });
-        });
-        requestAnimationFrame(draw);
-    }
-
-    // ДИНАМИЧЕСКИЙ СТОЛ
     function renderTable(count) {
         const layer = document.getElementById('dynamic-seats');
         layer.innerHTML = '';
@@ -198,32 +148,32 @@
             const p = document.createElement('div');
             p.className = 'player-node';
             p.style.left = x + 'px'; p.style.top = y + 'px';
-            p.innerHTML = i === 0 ? 'Вы' : '👤'; // Игрок всегда "Вы" на 1-й позиции
+            p.innerHTML = i === 0 ? 'Вы' : '👤';
             layer.appendChild(p);
         }
     }
 
-    // ДАННЫЕ СЛАЙДОВ (Твои эскизы)
-    const slides = [
-        { icon: "👥 ➔ ⭕", title: "МЕХАНИКА 10+1", desc: "Каждый пользователь вносит по 10 TON. Тур запускается, когда 11-й игрок заходит в комнату." },
-        { icon: "💰 ➔ 💎", title: "РАСПРЕДЕЛЕНИЕ", desc: "Общий банк 100 TON делится между участниками согласно алгоритму." },
-        { icon: "📈 ➔ ✅", title: "РЕЗУЛЬТАТ", desc: "Получайте выплату прямо на свой TON-кошелек в автоматическом режиме." }
-    ];
-    let currentSlideIndex = 0;
-
-    function showSlide(index) {
-        const container = document.getElementById('slide-container');
-        const s = slides[index];
-        container.innerHTML = `
-            <div style="font-size: 50px; margin-bottom: 20px;">${s.icon}</div>
-            <h2 style="color: var(--neon); margin-bottom: 10px;">${s.title}</h2>
-            <p style="font-size: 14px; line-height: 1.5; opacity: 0.9;">${s.desc}</p>
-        `;
+    // ГЛОБУС
+    let pts = [];
+    for(let i=0; i<120; i++) {
+        const t = Math.acos(-1 + (2*i)/120), p = Math.sqrt(120*Math.PI)*t;
+        pts.push({x: Math.cos(p)*Math.sin(t), y: Math.sin(p)*Math.sin(t), z: Math.cos(t)});
     }
-
-    function nextSlide() {
-        currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-        showSlide(currentSlideIndex);
+    let angle = 0;
+    function draw() {
+        angle += 0.015;
+        document.querySelectorAll('.globe-canvas').forEach(cvs => {
+            const ctx = cvs.getContext('2d');
+            ctx.clearRect(0,0,cvs.width,cvs.width);
+            pts.forEach(p => {
+                const x1 = p.x*Math.cos(angle) - p.z*Math.sin(angle);
+                const z1 = p.x*Math.sin(angle) + p.z*Math.cos(angle);
+                const sc = 1 / (2.2 - z1);
+                ctx.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
+                ctx.beginPath(); ctx.arc(x1*90*sc+cvs.width/2, p.y*90*sc+cvs.width/2, 1.5, 0, 7); ctx.fill();
+            });
+        });
+        requestAnimationFrame(draw);
     }
 
     // ЗАГРУЗКА
@@ -231,8 +181,18 @@
     const loader = setInterval(() => {
         prg += 2;
         document.getElementById('load-fill').style.width = prg + '%';
-        if(prg >= 100) { clearInterval(loader); show('menu'); }
+        if(prg >= 100) { clearInterval(loader); show('intro'); }
     }, 30);
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClick() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    }
 
     draw();
 </script>
