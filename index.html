@@ -1,127 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VEKSEL</title>
+    <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+    <style>
+        :root { --neon: #00f2ff; --bg: #000814; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; font-weight: bold; }
+        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
+        .screen { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; background: #000814; }
+        .active { display: flex !important; }
+        .veksel-header { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 10px var(--neon); margin-bottom: 20px; }
+        .neon-btn { width: 260px; border: 2px solid var(--neon); color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: none; text-transform: uppercase; }
+        .top-nav { width: 100%; display: flex; justify-content: space-between; padding: 20px; position: absolute; top: 0; }
+        .icon-box { width: 50px; height: 50px; border: 1px solid var(--neon); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    </style>
+</head>
+<body>
+
+<section id="splash" class="screen active">
+    <div class="veksel-header">VEKSEL</div>
+    <div style="width: 150px; height: 2px; background: #111;"><div id="load-fill" style="width: 0%; height: 100%; background: var(--neon); transition: 0.1s;"></div></div>
+</section>
+
+<section id="menu" class="screen">
+    <div class="top-nav">
+        <div class="icon-box" onclick="connectWallet()">👛</div>
+        <div class="icon-box" onclick="show('profile')">👤</div>
+    </div>
+    <div class="veksel-header">VEKSEL</div>
+    <button class="neon-btn" onclick="show('table')">СТОЛ</button>
+    <button class="neon-btn" onclick="show('exchange')">ОБМЕН</button>
+</section>
+
+<section id="profile" class="screen">
+    <div class="veksel-header">ПРОФИЛЬ</div>
+    <button class="neon-btn" onclick="connectWallet()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
+    <div onclick="show('menu')" style="color: var(--neon); margin-top: 20px;">НАЗАД</div>
+</section>
+
+<section id="table" class="screen">
+    <div class="top-nav">
+        <div class="icon-box" onclick="connectWallet()">👛</div>
+        <div class="icon-box" onclick="show('profile')">👤</div>
+    </div>
+    <div style="border: 2px solid var(--neon); width: 80%; height: 150px; border-radius: 50px; display: flex; align-items: center; justify-content: center;">
+        ОЖИДАНИЕ ИГРОКОВ
+    </div>
+    <div onclick="show('menu')" style="color: var(--neon); margin-top: 20px;">НАЗАД</div>
+</section>
+
+<section id="exchange" class="screen">
+    <div class="veksel-header">ОБМЕН</div>
+    <input type="number" id="amt" value="1" style="background: none; border: 1px solid var(--neon); color: white; padding: 10px; text-align: center; width: 200px; margin-bottom: 20px;">
+    <button class="neon-btn" onclick="handleExchange()">ОБМЕНЯТЬ</button>
+    <div onclick="show('menu')" style="color: var(--neon); margin-top: 20px;">НАЗАД</div>
+</section>
+
 <script>
-    // --- ИНИЦИАЛИЗАЦИЯ TON CONNECT ---
     const connector = new TonConnectSDK.TonConnect({
         manifestUrl: 'https://vekselcom99.github.io/veksel-app/tonconnect-manifest.json'
     });
 
-    // Функция для открытия кошелька (Улучшенная версия)
-    async function connectWallet() {
-        const walletLink = 'https://t.me/wallet/aws'; // Прямая ссылка на TON Space
-        
-        try {
-            // 1. Пытаемся получить ссылку от SDK
-            const connectUrl = await connector.connect({
-                universalLink: walletLink,
-                bridgeUrl: 'https://bridge.tonapi.io/bridge'
-            });
+    function show(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 
-            // 2. Если SDK выдал ссылку, переходим по ней
-            if (connectUrl) {
-                window.location.href = connectUrl;
-            } else {
-                // 3. Если SDK молчит, открываем TON Space напрямую
-                window.location.href = walletLink;
-            }
-        } catch (e) {
-            console.error("Ошибка подключения:", e);
-            // Запасной вариант: просто открываем кошелек
-            window.location.href = walletLink;
-        }
+    async function connectWallet() {
+        const link = 'https://t.me/wallet/aws';
+        try {
+            const url = await connector.connect({ universalLink: link, bridgeUrl: 'https://bridge.tonapi.io/bridge' });
+            if (url) window.location.href = url; else window.location.href = link;
+        } catch (e) { window.location.href = link; }
     }
 
     async function handleExchange() {
-        // Проверка подключения перед обменом
         if (!connector.connected) {
-            alert("Сначала подключите кошелек (нажмите на иконку 👛)");
-            return connectWallet();
+            alert("Сначала нажмите на кошелек 👛");
+            return;
         }
-
-        const amount = document.getElementById('exchange-input').value;
-        const transaction = {
-            validUntil: Math.floor(Date.now() / 1000) + 600,
-            messages: [{
-                address: "UQAVDUtqijqgsx5R7-0WDZt-DpouD-CRJTFHsNNaJYVHDDpP",
-                amount: (amount * 1000000000).toString()
-            }]
-        };
-
+        const val = document.getElementById('amt').value;
         try {
-            await connector.sendTransaction(transaction);
-            alert("Транзакция отправлена!");
-        } catch (e) {
-            alert("Транзакция отменена или произошла ошибка.");
-        }
-    }
-
-    // --- УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ ---
-    function show(id) {
-        // Скрываем все экраны и показываем нужный
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        const target = document.getElementById(id);
-        if(target) {
-            target.classList.add('active');
-            if(id === 'table') renderTable(10);
-        }
-    }
-
-    // Синхронизация полей ввода
-    const inputField = document.getElementById('exchange-input');
-    if (inputField) {
-        inputField.oninput = (e) => {
-            document.getElementById('veksel-output').value = e.target.value;
-        };
-    }
-
-    // --- ГРАФИКА И ЗАГРУЗКА ---
-    let pts = [];
-    for(let i=0; i<120; i++) {
-        const t = Math.acos(-1 + (2*i)/120), p = Math.sqrt(120*Math.PI)*t;
-        pts.push({x: Math.cos(p)*Math.sin(t), y: Math.sin(p)*Math.sin(t), z: Math.cos(t)});
-    }
-    
-    let angle = 0;
-    function draw() {
-        angle += 0.015;
-        document.querySelectorAll('.globe-canvas').forEach(cvs => {
-            const ctx = cvs.getContext('2d');
-            const size = cvs.width;
-            ctx.clearRect(0,0,size,size);
-            pts.forEach(p => {
-                const x1 = p.x*Math.cos(angle) - p.z*Math.sin(angle);
-                const z1 = p.x*Math.sin(angle) + p.z*Math.cos(angle);
-                const sc = 1 / (2.2 - z1);
-                const gx = x1 * (size*0.48) * sc + size/2;
-                const gy = p.y * (size*0.48) * sc + size/2;
-                ctx.fillStyle = `rgba(0, 242, 255, ${(z1+1)/2})`;
-                ctx.beginPath(); ctx.arc(gx, gy, size/100, 0, 7); ctx.fill();
+            await connector.sendTransaction({
+                validUntil: Math.floor(Date.now()/1000) + 60,
+                messages: [{ address: "UQAVDUtqijqgsx5R7-0WDZt-DpouD-CRJTFHsNNaJYVHDDpP", amount: (val * 1000000000).toString() }]
             });
-        });
-        requestAnimationFrame(draw);
+        } catch (e) { alert("Ошибка или отмена"); }
     }
 
-    function renderTable(count) {
-        const layer = document.getElementById('dynamic-seats');
-        if(!layer) return;
-        layer.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-            const a = (i / count) * Math.PI * 2;
-            const x = 150 + 130 * Math.cos(a) - 16;
-            const y = 80 + 65 * Math.sin(a) - 16;
-            const p = document.createElement('div');
-            p.className = 'player-node';
-            p.style.left = x + 'px'; p.style.top = y + 'px';
-            p.innerHTML = i === 4 ? 'Вы' : '👤';
-            layer.appendChild(p);
-        }
-    }
-
-    let prg = 0;
-    const loader = setInterval(() => {
-        prg += 2;
-        const fill = document.getElementById('load-fill');
-        if(fill) fill.style.width = prg + '%';
-        if(prg >= 100) { clearInterval(loader); show('menu'); }
-    }, 30);
-
-    draw();
+    let p = 0;
+    const i = setInterval(() => {
+        p += 5;
+        document.getElementById('load-fill').style.width = p + '%';
+        if (p >= 100) { clearInterval(i); show('menu'); }
+    }, 50);
 </script>
+</body>
+</html>
