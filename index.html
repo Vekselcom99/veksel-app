@@ -8,20 +8,22 @@
     <style>
         :root { --neon: #00f2ff; --bg: #000814; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; font-weight: bold; }
-        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .screen { display: none; position: absolute; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; background: #000814; }
         .active { display: flex !important; }
-        .veksel-header { font-size: 2.5rem; color: var(--neon); text-shadow: 0 0 10px var(--neon); margin-bottom: 20px; }
-        .neon-btn { width: 260px; border: 2px solid var(--neon); color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: none; text-transform: uppercase; }
-        .top-nav { width: 100%; display: flex; justify-content: space-between; padding: 20px; position: absolute; top: 0; }
-        .icon-box { width: 50px; height: 50px; border: 1px solid var(--neon); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .veksel-header { font-size: 2.2rem; color: var(--neon); text-shadow: 0 0 10px var(--neon); margin-bottom: 20px; letter-spacing: 5px; }
+        .neon-btn { width: 260px; border: 2px solid var(--neon); color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: rgba(0, 242, 255, 0.05); text-transform: uppercase; cursor: pointer; }
+        .top-nav { width: 100%; display: flex; justify-content: space-between; padding: 20px; position: absolute; top: 0; left: 0; }
+        .icon-box { width: 50px; height: 50px; border: 1px solid var(--neon); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <section id="splash" class="screen active">
     <div class="veksel-header">VEKSEL</div>
-    <div style="width: 150px; height: 2px; background: #111;"><div id="load-fill" style="width: 0%; height: 100%; background: var(--neon); transition: 0.1s;"></div></div>
+    <div style="width: 150px; height: 3px; background: #111; border-radius: 2px;">
+        <div id="load-fill" style="width: 0%; height: 100%; background: var(--neon); transition: 0.1s;"></div>
+    </div>
 </section>
 
 <section id="menu" class="screen">
@@ -36,8 +38,8 @@
 
 <section id="profile" class="screen">
     <div class="veksel-header">ПРОФИЛЬ</div>
-    <button class="neon-btn" onclick="connectWallet()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
-    <div onclick="show('menu')" style="color: var(--neon); margin-top: 20px;">НАЗАД</div>
+    <button class="neon-btn" onclick="connectWallet()">КОШЕЛЕК</button>
+    <div onclick="show('menu')" style="color: var(--neon); margin-top: 30px; cursor: pointer;">← НАЗАД</div>
 </section>
 
 <section id="table" class="screen">
@@ -45,57 +47,83 @@
         <div class="icon-box" onclick="connectWallet()">👛</div>
         <div class="icon-box" onclick="show('profile')">👤</div>
     </div>
-    <div style="border: 2px solid var(--neon); width: 80%; height: 150px; border-radius: 50px; display: flex; align-items: center; justify-content: center;">
-        ОЖИДАНИЕ ИГРОКОВ
+    <div style="border: 2px solid var(--neon); width: 85%; height: 160px; border-radius: 30px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3);">
+        <p style="color: var(--neon); letter-spacing: 1px;">ОЖИДАНИЕ ИГРОКОВ...</p>
     </div>
-    <div onclick="show('menu')" style="color: var(--neon); margin-top: 20px;">НАЗАД</div>
+    <div onclick="show('menu')" style="color: var(--neon); margin-top: 30px; cursor: pointer;">← НАЗАД</div>
 </section>
 
 <section id="exchange" class="screen">
     <div class="veksel-header">ОБМЕН</div>
-    <input type="number" id="amt" value="1" style="background: none; border: 1px solid var(--neon); color: white; padding: 10px; text-align: center; width: 200px; margin-bottom: 20px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <p style="font-size: 10px; opacity: 0.6; margin-bottom: 5px;">СУММА (TON)</p>
+        <input type="number" id="amt" value="1" style="background: none; border: 1px solid var(--neon); color: white; padding: 12px; text-align: center; width: 220px; font-size: 18px; border-radius: 8px; outline: none;">
+    </div>
     <button class="neon-btn" onclick="handleExchange()">ОБМЕНЯТЬ</button>
-    <div onclick="show('menu')" style="color: var(--neon); margin-top: 20px;">НАЗАД</div>
+    <div onclick="show('menu')" style="color: var(--neon); margin-top: 30px; cursor: pointer;">← НАЗАД</div>
 </section>
 
 <script>
-    const connector = new TonConnectSDK.TonConnect({
-        manifestUrl: 'https://vekselcom99.github.io/veksel-app/tonconnect-manifest.json'
-    });
+    // Инициализация
+    let connector;
+    try {
+        connector = new TonConnectSDK.TonConnect({
+            manifestUrl: 'https://vekselcom99.github.io/veksel-app/tonconnect-manifest.json'
+        });
+    } catch (e) {
+        console.error("SDK Error");
+    }
 
     function show(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        const screens = document.querySelectorAll('.screen');
+        screens.forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(id);
+        if(target) target.classList.add('active');
     }
 
     async function connectWallet() {
         const link = 'https://t.me/wallet/aws';
         try {
-            const url = await connector.connect({ universalLink: link, bridgeUrl: 'https://bridge.tonapi.io/bridge' });
+            const url = await connector.connect({ 
+                universalLink: link, 
+                bridgeUrl: 'https://bridge.tonapi.io/bridge' 
+            });
             if (url) window.location.href = url; else window.location.href = link;
-        } catch (e) { window.location.href = link; }
+        } catch (e) { 
+            window.location.href = link; 
+        }
     }
 
     async function handleExchange() {
-        if (!connector.connected) {
-            alert("Сначала нажмите на кошелек 👛");
+        if (!connector || !connector.connected) {
+            alert("Сначала подключите кошелек 👛");
             return;
         }
         const val = document.getElementById('amt').value;
         try {
             await connector.sendTransaction({
                 validUntil: Math.floor(Date.now()/1000) + 60,
-                messages: [{ address: "UQAVDUtqijqgsx5R7-0WDZt-DpouD-CRJTFHsNNaJYVHDDpP", amount: (val * 1000000000).toString() }]
+                messages: [{ 
+                    address: "UQAVDUtqijqgsx5R7-0WDZt-DpouD-CRJTFHsNNaJYVHDDpP", 
+                    amount: (val * 1000000000).toString() 
+                }]
             });
-        } catch (e) { alert("Ошибка или отмена"); }
+        } catch (e) { 
+            alert("Ошибка или отмена транзакции"); 
+        }
     }
 
+    // Загрузка
     let p = 0;
-    const i = setInterval(() => {
-        p += 5;
-        document.getElementById('load-fill').style.width = p + '%';
-        if (p >= 100) { clearInterval(i); show('menu'); }
-    }, 50);
+    const loader = setInterval(() => {
+        p += 4;
+        const fill = document.getElementById('load-fill');
+        if(fill) fill.style.width = p + '%';
+        if (p >= 100) { 
+            clearInterval(loader); 
+            show('menu'); 
+        }
+    }, 40);
 </script>
 </body>
 </html>
