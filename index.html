@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VEKSEL RESTORED EDITION</title>
+    <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
     <style>
         :root { --neon: #00f2ff; --bg: #000814; --pink: #ff007a; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; font-weight: bold; -webkit-tap-highlight-color: transparent; }
@@ -40,7 +41,7 @@
 <section id="menu" class="screen">
     <div class="top-nav">
         <div class="icon-box" onclick="show('exchange')">👛</div>
-        <div class="icon-box" onclick="show('profile')">👤</div>
+        <div class="icon-box" onclick="connectWallet()">👤</div>
     </div>
     <div class="veksel-header" style="margin-top: 80px;">VEKSEL</div>
     <button class="neon-btn" onclick="show('table')">СТОЛ</button>
@@ -55,7 +56,7 @@
         <canvas class="globe-canvas" width="160" height="160"></canvas>
         <div style="display:flex; flex-direction:column; margin-left: 10px;">
             <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('menu')">ГЛАВНАЯ</button>
-            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('withdraw')">ВЫВОД</button>
+            <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="connectWallet()">КОШЕЛЕК</button>
             <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('exchange')">ОБМЕН</button>
             <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('rules')">ПРАВИЛА</button>
         </div>
@@ -90,12 +91,11 @@
     <div class="main-frame">
         <h2 style="color:var(--neon); margin-bottom: 20px; letter-spacing: 2px;">ВЫВОД</h2>
         <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Сумма (TON)</p>
-        <input type="number" placeholder="0.00" class="input-line">
+        <input type="number" id="withdraw-amount" placeholder="0.00" class="input-line">
         <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Адрес вашего кошелька</p>
         <input type="text" placeholder="UQ..." class="input-line">
         <button class="neon-btn" style="width: 100%; margin-top: 10px; border-color: var(--pink);">Подтвердить</button>
     </div>
-    <p style="margin-top: 20px; color: var(--neon); font-size: 14px;">ВАШ ТЕКУЩИЙ БАЛАНС: 10.5 TON</p>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
@@ -106,7 +106,7 @@
         <div style="display:flex; justify-content: space-between; align-items:center;">
             <div style="text-align:left; flex:1;">
                 <p style="font-size:9px; opacity:0.7;">ОТДАЕТЕ (TON)</p>
-                <input type="number" value="1.00" class="input-line" style="text-align:left; font-size:22px;">
+                <input type="number" id="exchange-input" value="1" class="input-line" style="text-align:left; font-size:22px;">
             </div>
             <div style="font-size:20px; color:var(--pink); margin-left:10px;">👛</div>
         </div>
@@ -114,25 +114,59 @@
         <div style="display:flex; justify-content: space-between; align-items:center;">
             <div style="text-align:left; flex:1;">
                 <p style="font-size:9px; opacity:0.7;">ПОЛУЧАЕТЕ (VEKSEL)</p>
-                <input type="number" value="100.00" class="input-line" style="text-align:left; font-size:22px;">
+                <input type="number" id="veksel-output" value="1" class="input-line" style="text-align:left; font-size:22px;" readonly>
             </div>
             <div style="font-size:20px; color:var(--neon); margin-left:10px;">👤</div>
         </div>
-        <button class="neon-btn" style="width:100%; border-color: var(--pink); margin-top:10px;">ОБМЕНЯТЬ</button>
+        <button class="neon-btn" id="exchange-confirm-btn" style="width:100%; border-color: var(--pink); margin-top:10px;">ОБМЕНЯТЬ</button>
     </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
-<section id="rules" class="screen">
-    <div class="veksel-header">МЕХАНИКА</div>
-    <div style="text-align: center; padding: 20px; flex: 1; display:flex; flex-direction:column; justify-content:center;">
-        <div style="font-size: 45px; margin-bottom: 20px;">👥 ➔ ⭕</div>
-        <p style="font-size: 15px;">Тур запускается при 11 игроках.</p>
-    </div>
-    <div class="back-btn" onclick="show('profile')">НАЗАД</div>
-</section>
-
 <script>
+    // --- ЛОГИКА TON CONNECT ---
+    const connector = new TonConnectSDK.TonConnect({
+        manifestUrl: 'https://vekselcom99.github.io/veksel-app/tonconnect-manifest.json'
+    });
+
+    async function connectWallet() {
+        const walletConnectionSource = {
+            universalLink: 'https://t.me/wallet/aws',
+            bridgeUrl: 'https://bridge.tonapi.io/bridge'
+        };
+        try {
+            await connector.connect(walletConnectionSource);
+        } catch (e) {
+            alert("Ошибка подключения кошелька");
+        }
+    }
+
+    async function handleExchange() {
+        const amount = document.getElementById('exchange-input').value;
+        if (!amount || amount <= 0) return alert("Введите сумму");
+
+        const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 600,
+            messages: [{
+                address: "UQAVDUtqijqgsx5R7-0WDZt-DpouD-CRJTFHsNNaJYVHDDpP",
+                amount: (amount * 1000000000).toString()
+            }]
+        };
+
+        try {
+            await connector.sendTransaction(transaction);
+            alert("Запрос отправлен в TON Space. Ожидайте начисления VEKSEL!");
+        } catch (e) {
+            alert("Транзакция отменена или произошла ошибка.");
+        }
+    }
+
+    document.getElementById('exchange-confirm-btn').onclick = handleExchange;
+    document.getElementById('exchange-input').oninput = (e) => {
+        document.getElementById('veksel-output').value = e.target.value;
+    };
+
+    // --- ТВОЯ ГРАФИКА И ИНТЕРФЕЙС ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playClick() {
         const osc = audioCtx.createOscillator();
@@ -146,7 +180,7 @@
     function show(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'table') renderTable(10); // Показываем 10 человек для теста
+        if(id === 'table') renderTable(10);
     }
 
     let pts = [];
@@ -185,7 +219,7 @@
             const p = document.createElement('div');
             p.className = 'player-node';
             p.style.left = x + 'px'; p.style.top = y + 'px';
-            p.innerHTML = i === 4 ? 'Вы' : '👤'; // "Вы" на 5-й позиции для примера
+            p.innerHTML = i === 4 ? 'Вы' : '👤';
             layer.appendChild(p);
         }
     }
@@ -193,12 +227,12 @@
     let prg = 0;
     const loader = setInterval(() => {
         prg += 2;
-        document.getElementById('load-fill').style.width = prg + '%';
+        const fill = document.getElementById('load-fill');
+        if(fill) fill.style.width = prg + '%';
         if(prg >= 100) { clearInterval(loader); show('menu'); }
     }, 30);
 
     draw();
 </script>
 </body>
-    </html>
-    
+</html>
