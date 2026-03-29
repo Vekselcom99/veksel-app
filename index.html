@@ -40,18 +40,18 @@
 
 <section id="menu" class="screen">
     <div class="top-nav">
-        <div class="icon-box" onclick="show('exchange')">👛</div>
-        <div class="icon-box" onclick="connectWallet()">👤</div>
+        <div class="icon-box" onclick="connectWallet()">👛</div>
+        <div class="icon-box" onclick="show('profile')">👤</div>
     </div>
     <div class="veksel-header" style="margin-top: 80px;">VEKSEL</div>
     <button class="neon-btn" onclick="show('table')">СТОЛ</button>
     <button class="neon-btn" onclick="show('exchange')">ОБМЕН</button>
     <button class="neon-btn" onclick="show('withdraw')">ВЫВОД</button>
-    <button class="neon-btn" onclick="show('exchange')">ПОПОЛНИТЬ</button>
+    <button class="neon-btn" onclick="connectWallet()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
 </section>
 
 <section id="profile" class="screen">
-    <div class="veksel-header">VEKSEL</div>
+    <div class="veksel-header">ПРОФИЛЬ</div>
     <div style="display:flex; width:100%; align-items:center; justify-content: center;">
         <canvas class="globe-canvas" width="160" height="160"></canvas>
         <div style="display:flex; flex-direction:column; margin-left: 10px;">
@@ -61,16 +61,12 @@
             <button class="neon-btn" style="width:140px; padding:10px; font-size:11px;" onclick="show('rules')">ПРАВИЛА</button>
         </div>
     </div>
-    <div style="text-align: center; margin-top: 20px;">
-        <p style="font-size: 24px;">🤝 👥</p>
-        <p style="color: #ff4d4d; font-size: 9px; margin-top: 10px;">🛡️ ПРАВА ЗАЩИЩЕНЫ<br>VEKSEL ALGORITHM</p>
-    </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
 <section id="table" class="screen">
     <div class="top-nav">
-        <div class="icon-box" style="border-color: var(--pink);" onclick="show('exchange')">👛</div>
+        <div class="icon-box" style="border-color: var(--pink);" onclick="connectWallet()">👛</div>
         <canvas class="globe-canvas" width="60" height="60"></canvas> 
         <div class="icon-box" onclick="show('profile')">👤</div>
     </div>
@@ -81,20 +77,6 @@
     <div style="position: relative; width: 300px; height: 160px; border: 4px solid var(--neon); border-radius: 100px; margin-top: 30px; box-shadow: inset 0 0 20px var(--neon);">
         <div style="position:absolute; width:100%; text-align:center; top:42%; font-size:14px;">100 VEKSEL</div>
         <div id="dynamic-seats"></div>
-    </div>
-    <div style="margin-top: 35px; border: 1px solid var(--neon); padding: 8px 20px; border-radius: 10px; background: rgba(0,242,255,0.05); font-size: 13px;">balans: 10 VEK</div>
-    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
-</section>
-
-<section id="withdraw" class="screen">
-    <canvas class="globe-canvas" width="150" height="150" style="margin-top:20px;"></canvas>
-    <div class="main-frame">
-        <h2 style="color:var(--neon); margin-bottom: 20px; letter-spacing: 2px;">ВЫВОД</h2>
-        <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Сумма (TON)</p>
-        <input type="number" id="withdraw-amount" placeholder="0.00" class="input-line">
-        <p style="font-size:10px; opacity: 0.8; text-transform:uppercase;">Адрес вашего кошелька</p>
-        <input type="text" placeholder="UQ..." class="input-line">
-        <button class="neon-btn" style="width: 100%; margin-top: 10px; border-color: var(--pink);">Подтвердить</button>
     </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
@@ -108,43 +90,56 @@
                 <p style="font-size:9px; opacity:0.7;">ОТДАЕТЕ (TON)</p>
                 <input type="number" id="exchange-input" value="1" class="input-line" style="text-align:left; font-size:22px;">
             </div>
-            <div style="font-size:20px; color:var(--pink); margin-left:10px;">👛</div>
+            <div style="font-size:20px; color:var(--pink);">👛</div>
         </div>
-        <div style="height:1px; background:rgba(0,242,255,0.3); margin: 5px 0 15px;"></div>
         <div style="display:flex; justify-content: space-between; align-items:center;">
             <div style="text-align:left; flex:1;">
                 <p style="font-size:9px; opacity:0.7;">ПОЛУЧАЕТЕ (VEKSEL)</p>
                 <input type="number" id="veksel-output" value="1" class="input-line" style="text-align:left; font-size:22px;" readonly>
             </div>
-            <div style="font-size:20px; color:var(--neon); margin-left:10px;">👤</div>
+            <div style="font-size:20px; color:var(--neon);">👤</div>
         </div>
-        <button class="neon-btn" id="exchange-confirm-btn" style="width:100%; border-color: var(--pink); margin-top:10px;">ОБМЕНЯТЬ</button>
+        <button class="neon-btn" onclick="handleExchange()" style="width:100%; border-color: var(--pink); margin-top:10px;">ОБМЕНЯТЬ</button>
+    </div>
+    <div class="back-btn" onclick="show('menu')">НАЗАД</div>
+</section>
+
+<section id="withdraw" class="screen">
+    <div class="main-frame" style="margin-top:50px;">
+        <h2 style="color:var(--neon);">ВЫВОД</h2>
+        <input type="number" placeholder="СУММА TON" class="input-line">
+        <input type="text" placeholder="АДРЕС ВАШЕГО КОШЕЛЬКА" class="input-line">
+        <button class="neon-btn" style="width:100%;">ПОДТВЕРДИТЬ</button>
     </div>
     <div class="back-btn" onclick="show('menu')">НАЗАД</div>
 </section>
 
 <script>
-    // --- ЛОГИКА TON CONNECT ---
+    // --- НАСТРОЙКА TON CONNECT ---
     const connector = new TonConnectSDK.TonConnect({
         manifestUrl: 'https://vekselcom99.github.io/veksel-app/tonconnect-manifest.json'
     });
 
     async function connectWallet() {
         const walletConnectionSource = {
-            universalLink: 'https://t.me/wallet/aws',
+            universalLink: 'https://t.me/wallet/aws', // Ссылка для TON Space
             bridgeUrl: 'https://bridge.tonapi.io/bridge'
         };
         try {
             await connector.connect(walletConnectionSource);
         } catch (e) {
-            alert("Ошибка подключения кошелька");
+            console.error(e);
+            alert("Пожалуйста, откройте TON Space в Telegram");
         }
     }
 
     async function handleExchange() {
-        const amount = document.getElementById('exchange-input').value;
-        if (!amount || amount <= 0) return alert("Введите сумму");
+        if (!connector.connected) {
+            alert("Сначала подключите кошелек (нажмите на иконку 👛)");
+            return connectWallet();
+        }
 
+        const amount = document.getElementById('exchange-input').value;
         const transaction = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             messages: [{
@@ -155,40 +150,33 @@
 
         try {
             await connector.sendTransaction(transaction);
-            alert("Запрос отправлен в TON Space. Ожидайте начисления VEKSEL!");
+            alert("Транзакция отправлена!");
         } catch (e) {
-            alert("Транзакция отменена или произошла ошибка.");
+            alert("Ошибка транзакции. Убедитесь, что кошелек подключен.");
         }
     }
 
-    document.getElementById('exchange-confirm-btn').onclick = handleExchange;
+    // Синхронизация полей ввода
     document.getElementById('exchange-input').oninput = (e) => {
         document.getElementById('veksel-output').value = e.target.value;
     };
 
-    // --- ТВОЯ ГРАФИКА И ИНТЕРФЕЙС ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playClick() {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-    }
-
+    // --- ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ ---
     function show(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'table') renderTable(10);
+        const target = document.getElementById(id);
+        if(target) {
+            target.classList.add('active');
+            if(id === 'table') renderTable(10);
+        }
     }
 
+    // --- ГРАФИКА (ШАР) ---
     let pts = [];
     for(let i=0; i<120; i++) {
         const t = Math.acos(-1 + (2*i)/120), p = Math.sqrt(120*Math.PI)*t;
         pts.push({x: Math.cos(p)*Math.sin(t), y: Math.sin(p)*Math.sin(t), z: Math.cos(t)});
     }
-
     let angle = 0;
     function draw() {
         angle += 0.015;
@@ -211,6 +199,7 @@
 
     function renderTable(count) {
         const layer = document.getElementById('dynamic-seats');
+        if(!layer) return;
         layer.innerHTML = '';
         for (let i = 0; i < count; i++) {
             const a = (i / count) * Math.PI * 2;
@@ -222,6 +211,16 @@
             p.innerHTML = i === 4 ? 'Вы' : '👤';
             layer.appendChild(p);
         }
+    }
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClick() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
     }
 
     let prg = 0;
