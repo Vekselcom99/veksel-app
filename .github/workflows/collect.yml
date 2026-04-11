@@ -14,14 +14,12 @@ jobs:
       - name: Download Configs
         run: |
           curl -L https://raw.githubusercontent.com/yebekhe/TVC/main/feeds/full/nodes -o subscription.txt
-
-
           
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "action@github.com"
           git add subscription.txt
-          git commit -m "stable update" || exit 0
+          git commit -m "update working link" || exit 0
           git push
           
