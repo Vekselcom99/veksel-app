@@ -13,7 +13,8 @@ jobs:
 
       - name: Download Configs
         run: |
-          curl -L https://raw.githubusercontent.com/moseparsi/proxy-grabber/main/sub/base64/mix -o subscription.txt
+          curl -L https://raw.githubusercontent.com/yebekhe/TVC/main/feeds/full/nodes -o subscription.txt
+
           
       - name: Commit and Push
         run: |
