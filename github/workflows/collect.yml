@@ -1,0 +1,25 @@
+name: VPN_Collector
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Configs
+        run: |
+          curl -L https://raw.githubusercontent.com/yebekhe/TelegramV2rayCollector/main/sub/base64/mix -o subscription.txt
+          
+      - name: Push
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "action@github.com"
+          git add subscription.txt
+          git commit -m "Update" || exit 0
+          git push
+          
